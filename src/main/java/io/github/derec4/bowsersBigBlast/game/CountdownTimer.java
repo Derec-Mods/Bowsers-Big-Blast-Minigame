@@ -9,11 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Countdown timer that shows a bossbar per player and ticks every second.
@@ -41,10 +38,12 @@ public class CountdownTimer {
 
     public void start(int seconds) {
         cancel();
-        if (seconds <= 0) seconds = 10;
+        if (seconds <= 0) {
+            seconds = 10;
+        }
         this.totalSeconds = seconds;
         // Use AtomicInteger instead of an int[] hack so we have a mutable, thread-safe integer
-        final java.util.concurrent.atomic.AtomicInteger remaining = new java.util.concurrent.atomic.AtomicInteger(seconds);
+        final AtomicInteger remaining = new AtomicInteger(seconds);
 
         updateAllBars(remaining.get());
 
@@ -95,13 +94,18 @@ public class CountdownTimer {
                 bar.setTitle(title);
                 bar.setProgress(progress);
                 bar.setColor(color);
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         }
     }
 
     private BarColor determineColor(int remaining) {
-        if (remaining <= 2) return BarColor.RED;
-        if (remaining <= 5) return BarColor.YELLOW;
+        if (remaining <= 2) {
+            return BarColor.RED;
+        }
+        if (remaining <= 5) {
+            return BarColor.YELLOW;
+        }
         return BarColor.GREEN;
     }
 
@@ -148,7 +152,8 @@ public class CountdownTimer {
             BossBar bar = e.getValue();
             try {
                 bar.removeAll();
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         }
         bars.clear();
     }
@@ -157,7 +162,9 @@ public class CountdownTimer {
      * Add a player to the timer (creates a bossbar for them if not present)
      */
     public void addPlayer(Player p) {
-        if (bars.containsKey(p)) return;
+        if (bars.containsKey(p)) {
+            return;
+        }
         BossBar bar = Bukkit.createBossBar("Time: " + totalSeconds, BarColor.GREEN, BarStyle.SOLID);
         bar.addPlayer(p);
         bar.setProgress(1.0);
@@ -172,8 +179,11 @@ public class CountdownTimer {
         if (bar != null) {
             try {
                 bar.removePlayer(p);
-                if (bar.getPlayers().isEmpty()) bar.removeAll();
-            } catch (Exception ignored) { }
+                if (bar.getPlayers().isEmpty()) {
+                    bar.removeAll();
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
 }
