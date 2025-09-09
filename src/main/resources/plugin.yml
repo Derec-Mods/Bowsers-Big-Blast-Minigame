@@ -1,0 +1,8 @@
+name: BowsersBigBlast
+version: '1.0.0.0'
+main: io.github.derec4.bowsersBigBlast.BowsersBigBlast
+api-version: '1.20'
+prefix: DerexXD
+authors: [ DerexXD ]
+description: Engine for Bowser's Big Blast Minigame made for CheapPickle
+website: https://www.youtube.com/@CheapPickle/shorts
