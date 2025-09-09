@@ -39,6 +39,13 @@ public class DetonatorListener implements Listener {
 
         if (detonator != null) {
             System.out.println("Is detonator: " + detonator.isBomb());
+            if (detonator.isBomb()) {
+                Location tntLoc = event.getPlayer().getLocation().clone().add(0, 10, 0);
+                org.bukkit.entity.TNTPrimed tnt = (org.bukkit.entity.TNTPrimed) tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
+                tnt.setFuseTicks(40); // 2 seconds
+                event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
+                event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            }
         } else {
             System.out.println("Detonator is null");
         }

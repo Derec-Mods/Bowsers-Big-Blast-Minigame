@@ -34,7 +34,7 @@ public class TestCommandManager implements TabExecutor {
         }
 
         if (args.length == 0) {
-            sender.sendMessage("Usage: /bbtest <testCelebration|revealDetonator>");
+            sender.sendMessage("Usage: /bbtest");
             return true;
         }
 
