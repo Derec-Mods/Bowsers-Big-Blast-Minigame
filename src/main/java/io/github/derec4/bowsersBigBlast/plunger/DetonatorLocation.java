@@ -1,10 +1,10 @@
 package io.github.derec4.bowsersBigBlast.plunger;
 
-public class Location {
+public class DetonatorLocation {
     private double x, y, z;
     private String world;
 
-    public Location(String world, double x, double y, double z) {
+    public DetonatorLocation(String world, double x, double y, double z) {
         this.world = world;
         this.x = x;
         this.y = y;

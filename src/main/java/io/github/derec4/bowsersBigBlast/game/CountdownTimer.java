@@ -38,13 +38,13 @@ public class CountdownTimer {
 
     public void start(int seconds) {
         cancel();
+
         if (seconds <= 0) {
             seconds = 10;
         }
-        this.totalSeconds = seconds;
-        // Use AtomicInteger instead of an int[] hack so we have a mutable, thread-safe integer
-        final AtomicInteger remaining = new AtomicInteger(seconds);
 
+        this.totalSeconds = seconds;
+        final AtomicInteger remaining = new AtomicInteger(seconds);
         updateAllBars(remaining.get());
 
         task = new BukkitRunnable() {
@@ -86,7 +86,6 @@ public class CountdownTimer {
         BarColor color = determineColor(remaining);
         String title = "Time: " + remaining;
 
-        // snapshot players to avoid concurrent modification
         Set<Map.Entry<Player, BossBar>> entries = new HashSet<>(bars.entrySet());
         for (Map.Entry<Player, BossBar> e : entries) {
             BossBar bar = e.getValue();
@@ -110,7 +109,6 @@ public class CountdownTimer {
     }
 
     private void playDingToAll() {
-        // use a snapshot to avoid concurrent mod
         Set<Player> players = new HashSet<>(bars.keySet());
         for (Player p : players) {
             if (p != null && p.isOnline()) {
