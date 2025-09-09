@@ -6,3 +6,9 @@ prefix: DerexXD
 authors: [ DerexXD ]
 description: Engine for Bowser's Big Blast Minigame made for CheapPickle
 website: https://www.youtube.com/@CheapPickle/shorts
+commands:
+  bbtest:
+    description: Test/debug commands for Bowser's Big Blast
+    usage: /bbtest <testCelebration|revealDetonator>
+    permission: bowsersbigblast.bbtest
+    permission-message: You do not have permission to use this command.
