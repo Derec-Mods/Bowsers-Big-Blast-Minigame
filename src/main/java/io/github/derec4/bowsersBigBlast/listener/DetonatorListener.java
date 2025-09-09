@@ -38,7 +38,7 @@ public class DetonatorListener implements Listener {
         Detonator detonator = Detonator.getDetonator(loc, clicked);
 
         if (detonator != null) {
-            System.out.println("Is detonator: " + detonator.isDetonator());
+            System.out.println("Is detonator: " + detonator.isBomb());
         } else {
             System.out.println("Detonator is null");
         }

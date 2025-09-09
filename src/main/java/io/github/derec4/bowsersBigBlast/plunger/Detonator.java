@@ -5,12 +5,12 @@ import org.bukkit.block.Block;
 public class Detonator {
     private DetonatorLocation location;
     private Block block;
-    private boolean isDetonator;
+    private boolean isBomb;
 
-    public Detonator(DetonatorLocation location, Block block, boolean isDetonator) {
+    public Detonator(DetonatorLocation location, Block block, boolean isBomb) {
         this.location = location;
         this.block = block;
-        this.isDetonator = isDetonator;
+        this.isBomb = isBomb;
     }
 
     public DetonatorLocation getLocation() {
@@ -21,8 +21,8 @@ public class Detonator {
         return block;
     }
 
-    public boolean isDetonator() {
-        return isDetonator;
+    public boolean isBomb() {
+        return isBomb;
     }
 
     /**
