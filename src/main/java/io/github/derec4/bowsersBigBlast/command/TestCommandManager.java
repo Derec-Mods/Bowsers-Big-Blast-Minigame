@@ -7,11 +7,22 @@ import io.github.derec4.bowsersBigBlast.util.BlockUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Attachable;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Stairs;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.material.Button;
 
-public class TestCommandManager {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class TestCommandManager implements TabExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.isOp()) {
             sender.sendMessage("You must be OP to use this command.");
@@ -54,8 +65,14 @@ public class TestCommandManager {
                     Material chosenButton = BlockUtils.BUTTONS.get((int)(Math.random() * BlockUtils.BUTTONS.size()));
                     Block woolBlock = world.getBlockAt(baseLoc);
                     Block buttonBlock = world.getBlockAt(baseLoc.clone().add(0, 1, 0));
+                    BlockData blockData = Material.ACACIA_BUTTON.createBlockData();
+                    Attachable button = (Attachable) blockData;
+                    button.setAttached(true);
+                    buttonBlock.setBlockData(button);
+
                     woolBlock.setType(chosenWool);
                     buttonBlock.setType(chosenButton);
+                    BlockData data = buttonBlock.getBlockData();
 
                     // Register as Detonator
                     DetonatorLocation detLoc = new DetonatorLocation(
@@ -76,5 +93,26 @@ public class TestCommandManager {
                 break;
         }
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!command.getName().equalsIgnoreCase("bbtest")) {
+            return Collections.emptyList();
+        }
+
+        List<String> subcommands = Arrays.asList("testCelebration", "revealDetonator", "testDetonator");
+
+        if (args.length == 1) {
+            String partial = args[0].toLowerCase();
+            List<String> matches = new ArrayList<>();
+            for (String sub : subcommands) {
+                if (sub.toLowerCase().startsWith(partial)) {
+                    matches.add(sub);
+                }
+            }
+            return matches;
+        }
+        return Collections.emptyList();
     }
 }
