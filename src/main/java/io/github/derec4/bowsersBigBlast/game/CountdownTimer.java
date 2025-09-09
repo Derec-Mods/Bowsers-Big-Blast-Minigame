@@ -43,35 +43,36 @@ public class CountdownTimer {
         cancel();
         if (seconds <= 0) seconds = 10;
         this.totalSeconds = seconds;
-        final int[] remaining = { seconds };
+        // Use AtomicInteger instead of an int[] hack so we have a mutable, thread-safe integer
+        final java.util.concurrent.atomic.AtomicInteger remaining = new java.util.concurrent.atomic.AtomicInteger(seconds);
 
-        updateAllBars(remaining[0]);
+        updateAllBars(remaining.get());
 
         task = new BukkitRunnable() {
             @Override
             public void run() {
                 // Decrement first so bossbar shows updated value immediately on schedule tick
-                remaining[0]--;
+                int rem = remaining.decrementAndGet();
 
-                if (remaining[0] < 0) {
+                if (rem < 0) {
                     stopAndHide();
                     return;
                 }
 
-                updateAllBars(remaining[0]);
+                updateAllBars(rem);
 
-                if (remaining[0] <= 5 && remaining[0] > 0) {
+                if (rem <= 5 && rem > 0) {
                     playDingToAll();
                 }
 
-                if (remaining[0] == 10) {
-                    sendTitleToAll("§a" + remaining[0]); // green
-                } else if (remaining[0] <= 5 && remaining[0] > 3) {
-                    sendTitleToAll("§6" + remaining[0]); // gold
-                } else if (remaining[0] <= 3 && remaining[0] > 0) {
-                    sendTitleToAll("§c" + remaining[0]); // red
+                if (rem == 10) {
+                    sendTitleToAll("§a" + rem); // green
+                } else if (rem <= 5 && rem > 3) {
+                    sendTitleToAll("§6" + rem); // gold
+                } else if (rem <= 3 && rem > 0) {
+                    sendTitleToAll("§c" + rem); // red
                     playClickToAll();
-                } else if (remaining[0] == 0) {
+                } else if (rem == 0) {
                     // final tick reached - show 0 briefly (bossbar updated already)
                     sendTitleToAll("§c0");
                 }
