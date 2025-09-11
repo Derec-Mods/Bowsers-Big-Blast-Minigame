@@ -19,6 +19,23 @@ public class DetonatorManager {
     }
 
     /**
+     * Spawns a single detonator at the given location using BlockUtils.placeDetonatorBlock.
+     */
+    private void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world) {
+        BlockUtils.placeDetonatorBlock(woolLoc, woolType, buttonType);
+        Location buttonLoc = woolLoc.clone().add(0, 1, 0);
+        Block buttonBlock = world.getBlockAt(buttonLoc);
+        DetonatorLocation detLoc = new DetonatorLocation(
+            buttonBlock.getWorld().getName(),
+            buttonBlock.getX(),
+            buttonBlock.getY(),
+            buttonBlock.getZ()
+        );
+        Detonator detonator = new Detonator(detLoc, buttonBlock, true);
+        detonators.add(detonator);
+    }
+
+    /**
      * Spawns detonators in front of the player, spaced by 1 block, each with a unique wool and random button.
      * @param player The player to spawn in front of
      * @param playerCount Number of detonators to spawn
@@ -27,35 +44,37 @@ public class DetonatorManager {
         World world = player.getWorld();
         Location base = player.getLocation();
         Vector direction = base.getDirection().normalize();
+        Vector left = direction.clone().crossProduct(new Vector(0, 1, 0)).normalize();
         List<Material> wools = new ArrayList<>(BlockUtils.WOOLS);
         Collections.shuffle(wools);
         List<Material> usedWools = wools.subList(0, Math.min(playerCount, wools.size()));
-
         Random rand = new Random();
 
-        // spawn detonators, centered at the player, 2 blocks in front of them, separated by 1 gap
-        for (int i = 0; i < playerCount; i++) {
-            Material woolType = usedWools.get(i);
-            Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
+        Location centerLoc = base.clone().add(direction.clone().multiply(2));
+        centerLoc.setY(base.getBlockY());
 
-            // Calculate location: 1 block ahead per detonator, at player's Y
-            Location woolLoc = base.clone().add(direction.clone().multiply(i + 2));
-            woolLoc.setY(base.getBlockY());
-            BlockUtils.placeDetonatorBlock(woolLoc, woolType, buttonType);
+        int half = playerCount / 2;
+        int woolIndex = 0;
 
-            // Get the button block location
-            Location buttonLoc = woolLoc.clone().add(0, 1, 0);
-            Block buttonBlock = world.getBlockAt(buttonLoc);
-
-            DetonatorLocation detLoc = new DetonatorLocation(
-                buttonBlock.getWorld().getName(),
-                buttonBlock.getX(),
-                buttonBlock.getY(),
-                buttonBlock.getZ()
-            );
-            Detonator detonator = new Detonator(detLoc, buttonBlock, true);
-            detonators.add(detonator);
+        if (playerCount % 2 == 1) {
+            // Odd: include center
+            for (int offset = -half; offset <= half; offset++) {
+                Material woolType = usedWools.get(woolIndex);
+                Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
+                Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset));
+                spawnDetonatorAt(woolLoc, woolType, buttonType, world);
+                woolIndex++;
+            }
+        } else {
+            // Even: skip center (offset 0)
+            for (int offset = -half; offset <= half; offset++) {
+                if (offset == 0) continue;
+                Material woolType = usedWools.get(woolIndex);
+                Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
+                Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset));
+                spawnDetonatorAt(woolLoc, woolType, buttonType, world);
+                woolIndex++;
+            }
         }
     }
 }
-

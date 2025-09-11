@@ -46,7 +46,7 @@ public class BlockUtils {
     /**
      * Places a wool block and a button on top at the given location.
      */
-    public static boolean placeDetonatorBlock(Location baseLoc, Material wool, Material button) {
+    public static boolean placeDetonatorBlock (Location baseLoc, Material wool, Material button) {
         World world = baseLoc.getWorld();
         Block woolBlock = world.getBlockAt(baseLoc);
         woolBlock.setType(wool);

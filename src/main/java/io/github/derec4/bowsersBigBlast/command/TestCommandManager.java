@@ -4,6 +4,8 @@ import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
+import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
+import io.github.derec4.bowsersBigBlast.game.CountdownTimer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +16,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +24,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class TestCommandManager implements TabExecutor {
+    private final DetonatorManager detonatorManager;
+    private final Plugin plugin;
+
+    public TestCommandManager(Plugin plugin) {
+        this.plugin = plugin;
+        this.detonatorManager = new DetonatorManager();
+    }
+
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.isOp()) {
             sender.sendMessage("You must be OP to use this command.");
@@ -80,6 +91,35 @@ public class TestCommandManager implements TabExecutor {
                     sender.sendMessage("Only players can test detonator.");
                 }
                 break;
+            case "testspawndetonators":
+                if (sender instanceof Player player) {
+                    int count = 5;
+                    if (args.length > 1) {
+                        try {
+                            count = Math.max(1, Math.min(10, Integer.parseInt(args[1])));
+                        } catch (NumberFormatException ignored) {}
+                    }
+                    detonatorManager.spawnDetonators(player, count);
+                    sender.sendMessage("Spawned " + count + " detonators in front of you.");
+                } else {
+                    sender.sendMessage("Only players can test detonator spawning.");
+                }
+                break;
+            case "testcountdowntimer":
+                if (sender instanceof Player player) {
+                    int seconds = 10;
+                    if (args.length > 1) {
+                        try {
+                            seconds = Math.max(1, Math.min(60, Integer.parseInt(args[1])));
+                        } catch (NumberFormatException ignored) {}
+                    }
+                    CountdownTimer timer = new CountdownTimer(plugin, Collections.singleton(player));
+                    timer.start(seconds);
+                    sender.sendMessage("CountdownTimer started for " + seconds + " seconds.");
+                } else {
+                    sender.sendMessage("Only players can test countdown timer.");
+                }
+                break;
             default:
                 sender.sendMessage("Unknown test command. Usage: /bbtest [thing u want to debug]");
                 break;
@@ -93,7 +133,13 @@ public class TestCommandManager implements TabExecutor {
             return Collections.emptyList();
         }
 
-        List<String> subcommands = Arrays.asList("testCelebration", "revealDetonator", "testDetonator");
+        List<String> subcommands = Arrays.asList(
+            "testCelebration",
+            "revealDetonator",
+            "testDetonator",
+            "testspawndetonators",
+            "testcountdowntimer"
+        );
 
         if (args.length == 1) {
             String partial = args[0].toLowerCase();
@@ -104,6 +150,18 @@ public class TestCommandManager implements TabExecutor {
                 }
             }
             return matches;
+        }
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("testspawndetonators")) {
+                List<String> nums = new ArrayList<>();
+                for (int i = 1; i <= 10; i++) nums.add(String.valueOf(i));
+                return nums;
+            }
+            if (args[0].equalsIgnoreCase("testcountdowntimer")) {
+                List<String> nums = new ArrayList<>();
+                for (int i = 1; i <= 60; i++) nums.add(String.valueOf(i));
+                return nums;
+            }
         }
         return Collections.emptyList();
     }
