@@ -7,15 +7,12 @@ import io.github.derec4.bowsersBigBlast.util.BlockUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Attachable;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Stairs;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.material.Button;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,25 +58,16 @@ public class TestCommandManager implements TabExecutor {
                         break;
                     }
 
-                    Material chosenWool = BlockUtils.WOOLS.get((int)(Math.random() * BlockUtils.WOOLS.size()));
-                    Material chosenButton = BlockUtils.BUTTONS.get((int)(Math.random() * BlockUtils.BUTTONS.size()));
-                    Block woolBlock = world.getBlockAt(baseLoc);
-                    Block buttonBlock = world.getBlockAt(baseLoc.clone().add(0, 1, 0));
-                    BlockData blockData = Material.ACACIA_BUTTON.createBlockData();
-                    Attachable button = (Attachable) blockData;
-                    button.setAttached(true);
-                    buttonBlock.setBlockData(button);
-
-                    woolBlock.setType(chosenWool);
-                    buttonBlock.setType(chosenButton);
-                    BlockData data = buttonBlock.getBlockData();
+                    Material chosenWool = BlockUtils.WOOLS.get((int) (Math.random() * BlockUtils.WOOLS.size()));
+                    Material chosenButton = BlockUtils.BUTTONS.get((int) (Math.random() * BlockUtils.BUTTONS.size()));
+                    Boolean placed = BlockUtils.placeDetonatorBlock(baseLoc, chosenWool, chosenButton);
 
                     // Register as Detonator
                     DetonatorLocation detLoc = new DetonatorLocation(
-                        buttonBlock.getWorld().getName(),
-                        buttonBlock.getX(),
-                        buttonBlock.getY(),
-                        buttonBlock.getZ()
+                            chosenButton.getWorld().getName(),
+                            chosenButton.getX(),
+                            chosenButton.getY(),
+                            chosenButton.getZ()
                     );
                     Detonator detonator = Detonator.getDetonator(detLoc, buttonBlock);
                     sender.sendMessage("Spawned at " + baseLoc.getBlockX() + "," + baseLoc.getBlockY() + "," + baseLoc.getBlockZ());
