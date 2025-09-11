@@ -5,6 +5,7 @@ import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Attachable;
@@ -60,14 +61,17 @@ public class TestCommandManager implements TabExecutor {
 
                     Material chosenWool = BlockUtils.WOOLS.get((int) (Math.random() * BlockUtils.WOOLS.size()));
                     Material chosenButton = BlockUtils.BUTTONS.get((int) (Math.random() * BlockUtils.BUTTONS.size()));
-                    Boolean placed = BlockUtils.placeDetonatorBlock(baseLoc, chosenWool, chosenButton);
+                    BlockUtils.placeDetonatorBlock(baseLoc, chosenWool, chosenButton);
+
+                    Location buttonLoc = baseLoc.clone().add(0, 1, 0);
+                    Block buttonBlock = world.getBlockAt(buttonLoc);
 
                     // Register as Detonator
                     DetonatorLocation detLoc = new DetonatorLocation(
-                            chosenButton.getWorld().getName(),
-                            chosenButton.getX(),
-                            chosenButton.getY(),
-                            chosenButton.getZ()
+                            buttonBlock.getWorld().getName(),
+                            buttonBlock.getX(),
+                            buttonBlock.getY(),
+                            buttonBlock.getZ()
                     );
                     Detonator detonator = Detonator.getDetonator(detLoc, buttonBlock);
                     sender.sendMessage("Spawned at " + baseLoc.getBlockX() + "," + baseLoc.getBlockY() + "," + baseLoc.getBlockZ());
