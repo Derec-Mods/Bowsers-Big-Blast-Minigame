@@ -1,11 +1,13 @@
 package io.github.derec4.bowsersBigBlast.command;
 
+import io.github.derec4.bowsersBigBlast.BowsersBigBlast;
 import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
 import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
 import io.github.derec4.bowsersBigBlast.game.CountdownTimer;
+import io.github.derec4.bowsersBigBlast.game.GameState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -119,6 +121,16 @@ public class TestCommandManager implements TabExecutor {
                 } else {
                     sender.sendMessage("Only players can test countdown timer.");
                 }
+                break;
+            case "teststartgame":
+                // Allow starting the game with any number of players
+                GameState.getInstance().setMaxPlayers(1);
+                BowsersBigBlast.initializeGamePlayers();
+                int actualPlayers = GameState.getInstance().getCurrentPlayers().size();
+                GameState.getInstance().setMaxPlayers(actualPlayers);
+                GameState.getInstance().setGameRunning(true);
+                sender.sendMessage("Test: Bowser's Big Blast game started with " + actualPlayers + " players (minPlayers set to 1).");
+                GameState.getInstance().startGame();
                 break;
             default:
                 sender.sendMessage("Unknown test command. Usage: /bbtest [thing u want to debug]");
