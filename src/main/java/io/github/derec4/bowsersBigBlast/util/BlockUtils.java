@@ -58,6 +58,7 @@ public class BlockUtils {
 
         if (data instanceof Switch buttonData) {
             buttonData.setAttachedFace(FaceAttachable.AttachedFace.FLOOR);
+            buttonBlock.setBlockData(buttonData);
             return true;
         }
         return false;

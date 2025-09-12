@@ -61,7 +61,9 @@ public class DetonatorManager {
             for (int offset = -half; offset <= half; offset++) {
                 Material woolType = usedWools.get(woolIndex);
                 Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
-                Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset));
+                
+                // Space detonators by 2 blocks (1 air block between each)
+                Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
                 spawnDetonatorAt(woolLoc, woolType, buttonType, world);
                 woolIndex++;
             }
@@ -71,7 +73,9 @@ public class DetonatorManager {
                 if (offset == 0) continue;
                 Material woolType = usedWools.get(woolIndex);
                 Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
-                Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset));
+
+                // Space detonators by 2 blocks (1 air block between each)
+                Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
                 spawnDetonatorAt(woolLoc, woolType, buttonType, world);
                 woolIndex++;
             }
