@@ -36,6 +36,27 @@ public class DetonatorManager {
     }
 
     /**
+     * Returns the closest cardinal direction (N, E, S, W) as a normalized Vector based on the player's yaw.
+     */
+    private Vector getCardinalDirection(Location loc) {
+        float yaw = loc.getYaw();
+        yaw = (yaw % 360 + 360) % 360; // Normalize yaw to [0, 360)
+        if ((yaw >= 315 || yaw < 45)) {
+            // South (positive Z)
+            return new Vector(0, 0, 1);
+        } else if (yaw >= 45 && yaw < 135) {
+            // West (negative X)
+            return new Vector(-1, 0, 0);
+        } else if (yaw >= 135 && yaw < 225) {
+            // North (negative Z)
+            return new Vector(0, 0, -1);
+        } else {
+            // East (positive X)
+            return new Vector(1, 0, 0);
+        }
+    }
+
+    /**
      * Spawns detonators in front of the player, spaced by 1 block, each with a unique wool and random button.
      * @param player The player to spawn in front of
      * @param playerCount Number of detonators to spawn
@@ -43,8 +64,9 @@ public class DetonatorManager {
     public void spawnDetonators(Player player, int playerCount) {
         World world = player.getWorld();
         Location base = player.getLocation();
-        Vector direction = base.getDirection().normalize();
+        Vector direction = getCardinalDirection(base);
         Vector left = direction.clone().crossProduct(new Vector(0, 1, 0)).normalize();
+
         List<Material> wools = new ArrayList<>(BlockUtils.WOOLS);
         Collections.shuffle(wools);
         List<Material> usedWools = wools.subList(0, Math.min(playerCount, wools.size()));
@@ -61,7 +83,6 @@ public class DetonatorManager {
             for (int offset = -half; offset <= half; offset++) {
                 Material woolType = usedWools.get(woolIndex);
                 Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
-                
                 // Space detonators by 2 blocks (1 air block between each)
                 Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
                 spawnDetonatorAt(woolLoc, woolType, buttonType, world);
@@ -73,7 +94,6 @@ public class DetonatorManager {
                 if (offset == 0) continue;
                 Material woolType = usedWools.get(woolIndex);
                 Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
-
                 // Space detonators by 2 blocks (1 air block between each)
                 Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
                 spawnDetonatorAt(woolLoc, woolType, buttonType, world);
