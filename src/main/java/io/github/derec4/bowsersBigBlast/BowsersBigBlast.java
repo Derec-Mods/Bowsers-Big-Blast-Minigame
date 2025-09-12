@@ -3,8 +3,13 @@ package io.github.derec4.bowsersBigBlast;
 import io.github.derec4.bowsersBigBlast.command.TestCommandManager;
 import io.github.derec4.bowsersBigBlast.listener.OnMinigameEnd;
 import io.github.derec4.bowsersBigBlast.listener.DetonatorListener;
+import io.github.derec4.bowsersBigBlast.game.GameState;
+import io.github.derec4.bowsersBigBlast.player.GamePlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BowsersBigBlast extends JavaPlugin {
@@ -33,5 +38,14 @@ public final class BowsersBigBlast extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    public static void initializeGamePlayers() {
+        GameState.getInstance().getCurrentPlayers().clear();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE) {
+                GameState.getInstance().getCurrentPlayers().add(new GamePlayer(player));
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package io.github.derec4.bowsersBigBlast.command;
 
+import io.github.derec4.bowsersBigBlast.BowsersBigBlast;
 import io.github.derec4.bowsersBigBlast.game.GameState;
 
 public class CommandManager {
@@ -17,7 +18,9 @@ public class CommandManager {
                     }
                     GameState.getInstance().setMaxPlayers(numPlayers);
                     GameState.getInstance().setGameRunning(true);
+                    BowsersBigBlast.initializeGamePlayers();
                     System.out.println("Bowser's Big Blast game started with " + numPlayers + " players.");
+                    GameState.getInstance().startGame();
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid number of players.");
                 }

@@ -49,5 +49,32 @@ public class GameState {
         currentPlayers.clear();
         maxPlayers = 6;
     }
-}
 
+    public void startGame() {
+        if (currentPlayers.size() < minPlayers) {
+            System.out.println("Not enough players to start the game.");
+            return;
+        }
+        setGameRunning(true);
+        int round = 1;
+        int detonators = currentPlayers.size();
+        while (currentPlayers.size() > 1 && isGameRunning) {
+            System.out.println("--- Round " + round + " ---");
+            System.out.println("Detonators: " + detonators);
+            boolean eliminated = false;
+            for (int i = 0; i < currentPlayers.size(); i++) {
+                System.out.println("Player " + (i + 1) + "'s turn.");
+                // TODO: Add detonator selection and elimination logic here
+                // For now, simulate no elimination
+            }
+            if (eliminated) {
+                detonators = currentPlayers.size();
+            } else {
+                // No one eliminated, same number of detonators next round
+            }
+            round++;
+        }
+        System.out.println("Game over! Winner: " + (currentPlayers.size() == 1 ? "Player 1" : "None"));
+        setGameRunning(false);
+    }
+}

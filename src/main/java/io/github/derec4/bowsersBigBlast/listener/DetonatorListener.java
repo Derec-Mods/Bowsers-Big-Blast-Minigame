@@ -8,6 +8,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class DetonatorListener implements Listener {
     @EventHandler
@@ -40,10 +42,11 @@ public class DetonatorListener implements Listener {
         if (detonator != null) {
             System.out.println("Is detonator: " + detonator.isBomb());
             if (detonator.isBomb()) {
+                event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
+                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 40, 100, false, false, false));
                 Location tntLoc = event.getPlayer().getLocation().clone().add(0, 10, 0);
                 org.bukkit.entity.TNTPrimed tnt = (org.bukkit.entity.TNTPrimed) tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
                 tnt.setFuseTicks(40); // 2 seconds
-                event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
         } else {

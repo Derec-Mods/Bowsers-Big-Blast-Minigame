@@ -10,7 +10,6 @@ public class UnluckyChoiceEvent extends Event implements Cancellable {
     private Player winner;
     private boolean cancelled;
 
-
     public UnluckyChoiceEvent(Player winner) {
         this.winner = winner;
     }
