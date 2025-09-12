@@ -1,5 +1,7 @@
 package io.github.derec4.bowsersBigBlast;
 
+import io.github.derec4.bowsersBigBlast.command.BowserGameTabCompleter;
+import io.github.derec4.bowsersBigBlast.command.CommandManager;
 import io.github.derec4.bowsersBigBlast.command.TestCommandManager;
 import io.github.derec4.bowsersBigBlast.listener.OnMinigameEnd;
 import io.github.derec4.bowsersBigBlast.listener.DetonatorListener;
@@ -29,10 +31,12 @@ public final class BowsersBigBlast extends JavaPlugin {
 
         // Plugin startup logic
         getCommand("bbtest").setExecutor((CommandSender sender, Command command, String label, String[] args) -> {
-            return new TestCommandManager().onCommand(sender, command, label, args);
+            return new TestCommandManager(this).onCommand(sender, command, label, args);
         });
         getServer().getPluginManager().registerEvents(new OnMinigameEnd(), this);
         getServer().getPluginManager().registerEvents(new DetonatorListener(), this);
+        getCommand("bowsergame").setExecutor(new CommandManager());
+        getCommand("bowsergame").setTabCompleter(new CommandManager());
     }
 
     @Override
