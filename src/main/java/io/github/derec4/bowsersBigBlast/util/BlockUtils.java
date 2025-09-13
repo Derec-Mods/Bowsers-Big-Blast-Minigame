@@ -35,10 +35,10 @@ public class BlockUtils {
 //            Material.GRAY_WOOL,
 //            Material.LIGHT_GRAY_WOOL,
 //            Material.CYAN_WOOL,
-            Material.PURPLE_WOOL,
+//            Material.PURPLE_WOOL,
 //            Material.BLUE_WOOL,
 //            Material.BROWN_WOOL,
-            Material.GREEN_WOOL,
+//            Material.GREEN_WOOL,
             Material.RED_WOOL
 //            Material.BLACK_WOOL
     );

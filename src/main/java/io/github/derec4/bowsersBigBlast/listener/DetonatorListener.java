@@ -1,5 +1,6 @@
 package io.github.derec4.bowsersBigBlast.listener;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -40,17 +41,17 @@ public class DetonatorListener implements Listener {
         Detonator detonator = Detonator.getDetonator(loc, clicked);
 
         if (detonator != null) {
-            System.out.println("Is detonator: " + detonator.isBomb());
+            Bukkit.getLogger().info("Is detonator: " + detonator.isBomb());
             if (detonator.isBomb()) {
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
                 event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 40, 100, false, false, false));
                 Location tntLoc = event.getPlayer().getLocation().clone().add(0, 10, 0);
                 org.bukkit.entity.TNTPrimed tnt = (org.bukkit.entity.TNTPrimed) tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
-                tnt.setFuseTicks(40); // 2 seconds
+                tnt.setFuseTicks(40);
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
         } else {
-            System.out.println("Detonator is null");
+            Bukkit.getLogger().warning("Detonator is null");
         }
     }
 

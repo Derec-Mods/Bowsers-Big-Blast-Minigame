@@ -3,6 +3,7 @@ package io.github.derec4.bowsersBigBlast.game;
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.Bukkit;
 
 public class GameState {
     private static GameState instance;
@@ -52,18 +53,18 @@ public class GameState {
 
     public void startGame() {
         if (currentPlayers.size() < minPlayers) {
-            System.out.println("Not enough players to start the game.");
+            Bukkit.getLogger().warning("Not enough players to start the game.");
             return;
         }
         setGameRunning(true);
         int round = 1;
         int detonators = currentPlayers.size();
         while (currentPlayers.size() > 1 && isGameRunning) {
-            System.out.println("--- Round " + round + " ---");
-            System.out.println("Detonators: " + detonators);
+            Bukkit.getLogger().info("--- Round " + round + " ---");
+            Bukkit.getLogger().info("Detonators: " + detonators);
             boolean eliminated = false;
             for (int i = 0; i < currentPlayers.size(); i++) {
-                System.out.println("Player " + (i + 1) + "'s turn.");
+                Bukkit.getLogger().info("Player " + (i + 1) + "'s turn.");
                 // TODO: Add detonator selection and elimination logic here
                 // For now, simulate no elimination
             }
@@ -74,7 +75,7 @@ public class GameState {
             }
             round++;
         }
-        System.out.println("Game over! Winner: " + (currentPlayers.size() == 1 ? "Player 1" : "None"));
+        Bukkit.getLogger().info("Game over! Winner: " + (currentPlayers.size() == 1 ? "Player 1" : "None"));
         setGameRunning(false);
     }
 }
