@@ -21,7 +21,7 @@ public class DetonatorManager {
     /**
      * Spawns a single detonator at the given location using BlockUtils.placeDetonatorBlock.
      */
-    private void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world) {
+    private void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world, boolean isUnlucky) {
         BlockUtils.placeDetonatorBlock(woolLoc, woolType, buttonType);
         Location buttonLoc = woolLoc.clone().add(0, 1, 0);
         Block buttonBlock = world.getBlockAt(buttonLoc);
@@ -31,27 +31,28 @@ public class DetonatorManager {
             buttonBlock.getY(),
             buttonBlock.getZ()
         );
-        Detonator detonator = new Detonator(detLoc, buttonBlock, true);
+        Detonator detonator = new Detonator(detLoc, buttonBlock, isUnlucky);
         detonators.add(detonator);
     }
 
     /**
      * Returns the closest cardinal direction (N, E, S, W) as a normalized Vector based on the player's yaw.
+     * generated this using AI because i was too lazy to do the math
      */
     private Vector getCardinalDirection(Location loc) {
         float yaw = loc.getYaw();
         yaw = (yaw % 360 + 360) % 360; // Normalize yaw to [0, 360)
         if ((yaw >= 315 || yaw < 45)) {
-            // South (positive Z)
+            // South
             return new Vector(0, 0, 1);
         } else if (yaw >= 45 && yaw < 135) {
-            // West (negative X)
+            // West
             return new Vector(-1, 0, 0);
         } else if (yaw >= 135 && yaw < 225) {
-            // North (negative Z)
+            // North
             return new Vector(0, 0, -1);
         } else {
-            // East (positive X)
+            // East
             return new Vector(1, 0, 0);
         }
     }
@@ -77,15 +78,17 @@ public class DetonatorManager {
 
         int half = playerCount / 2;
         int woolIndex = 0;
+        int unluckyIndex = rand.nextInt(playerCount); // Pick one unlucky detonator
 
         if (playerCount % 2 == 1) {
             // Odd: include center
             for (int offset = -half; offset <= half; offset++) {
                 Material woolType = usedWools.get(woolIndex);
                 Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
-                // Space detonators by 2 blocks (1 air block between each)
                 Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
-                spawnDetonatorAt(woolLoc, woolType, buttonType, world);
+                boolean isUnlucky = (woolIndex == unluckyIndex);
+
+                spawnDetonatorAt(woolLoc, woolType, buttonType, world, isUnlucky);
                 woolIndex++;
             }
         } else {
@@ -94,9 +97,10 @@ public class DetonatorManager {
                 if (offset == 0) continue;
                 Material woolType = usedWools.get(woolIndex);
                 Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
-                // Space detonators by 2 blocks (1 air block between each)
                 Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
-                spawnDetonatorAt(woolLoc, woolType, buttonType, world);
+                boolean isUnlucky = (woolIndex == unluckyIndex);
+
+                spawnDetonatorAt(woolLoc, woolType, buttonType, world, isUnlucky);
                 woolIndex++;
             }
         }
