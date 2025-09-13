@@ -19,7 +19,7 @@ public class DetonatorManager {
     }
 
     /**
-     * Spawns a single detonator at the given location using BlockUtils.placeDetonatorBlock.
+     * Spawns a single detonator at the given location with button
      */
     private void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world, boolean isUnlucky) {
         BlockUtils.placeDetonatorBlock(woolLoc, woolType, buttonType);
