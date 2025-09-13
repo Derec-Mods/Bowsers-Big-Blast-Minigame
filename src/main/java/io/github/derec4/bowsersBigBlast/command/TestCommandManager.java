@@ -2,12 +2,12 @@ package io.github.derec4.bowsersBigBlast.command;
 
 import io.github.derec4.bowsersBigBlast.BowsersBigBlast;
 import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
+import io.github.derec4.bowsersBigBlast.game.CountdownTimer;
+import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
+import io.github.derec4.bowsersBigBlast.game.GameState;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
-import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
-import io.github.derec4.bowsersBigBlast.game.CountdownTimer;
-import io.github.derec4.bowsersBigBlast.game.GameState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,12 +26,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class TestCommandManager implements TabExecutor {
-    private final DetonatorManager detonatorManager;
     private final Plugin plugin;
 
     public TestCommandManager(Plugin plugin) {
         this.plugin = plugin;
-        this.detonatorManager = new DetonatorManager();
+        // Use singleton DetonatorManager for consistency
+        // this.detonatorManager = new DetonatorManager(); // Remove this
     }
 
     @Override
@@ -107,9 +107,10 @@ public class TestCommandManager implements TabExecutor {
                     buttonBlock.getY(),
                     buttonBlock.getZ()
             );
-            Detonator detonator = Detonator.getDetonator(detLoc, buttonBlock);
+            // Use DetonatorManager singleton for lookup
+            Detonator detonator = DetonatorManager.getInstance().getDetonatorByBlock(buttonBlock);
             sender.sendMessage("Spawned at " + baseLoc.getBlockX() + "," + baseLoc.getBlockY() + "," + baseLoc.getBlockZ());
-            sender.sendMessage("Detonator isBomb: " + detonator.isBomb());
+            sender.sendMessage("Detonator isBomb: " + (detonator != null ? detonator.isBomb() : "null"));
         } else {
             sender.sendMessage("Only players can test detonator.");
         }
@@ -123,7 +124,7 @@ public class TestCommandManager implements TabExecutor {
                     count = Math.max(1, Math.min(10, Integer.parseInt(args[1])));
                 } catch (NumberFormatException ignored) {}
             }
-            detonatorManager.spawnDetonators(player, count);
+            io.github.derec4.bowsersBigBlast.game.DetonatorManager.getInstance().spawnDetonators(player, count);
             sender.sendMessage("Spawned " + count + " detonators in front of you.");
         } else {
             sender.sendMessage("Only players can test detonator spawning.");

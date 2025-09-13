@@ -38,7 +38,8 @@ public class DetonatorListener implements Listener {
             bukkitLoc.getZ()
         );
 
-        Detonator detonator = Detonator.getDetonator(loc, clicked);
+        // Use DetonatorManager singleton for lookup
+        Detonator detonator = io.github.derec4.bowsersBigBlast.game.DetonatorManager.getInstance().getDetonatorByBlock(clicked);
 
         if (detonator != null) {
             Bukkit.getLogger().info("Is detonator: " + detonator.isBomb());

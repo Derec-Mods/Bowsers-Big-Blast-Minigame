@@ -12,10 +12,26 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class DetonatorManager {
-    private final List<Detonator> detonators = new ArrayList<>();
+    private final Map<DetonatorLocation, Detonator> detonatorMap = new HashMap<>();
 
-    public List<Detonator> getDetonators() {
-        return Collections.unmodifiableList(detonators);
+    private static DetonatorManager instance;
+    public static DetonatorManager getInstance() {
+        if (instance == null) {
+            instance = new DetonatorManager();
+        }
+        return instance;
+    }
+
+    public Detonator getDetonatorByBlock(Block block) {
+        if (block == null) return null;
+        Location bukkitLoc = block.getLocation();
+        DetonatorLocation loc = new DetonatorLocation(
+            bukkitLoc.getWorld().getName(),
+            bukkitLoc.getX(),
+            bukkitLoc.getY(),
+            bukkitLoc.getZ()
+        );
+        return detonatorMap.get(loc);
     }
 
     /**
@@ -32,7 +48,7 @@ public class DetonatorManager {
             buttonBlock.getZ()
         );
         Detonator detonator = new Detonator(detLoc, buttonBlock, isUnlucky);
-        detonators.add(detonator);
+        detonatorMap.put(detLoc, detonator);
     }
 
     /**

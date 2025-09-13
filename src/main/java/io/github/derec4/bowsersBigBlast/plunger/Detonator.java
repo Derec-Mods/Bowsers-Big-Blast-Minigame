@@ -24,16 +24,4 @@ public class Detonator {
     public boolean isBomb() {
         return isBomb;
     }
-
-    /**
-     * Retrieve a Detonator from a given Location and Block, if valid.
-     */
-    public static Detonator getDetonator(DetonatorLocation location, Block block) {
-        if (block == null || location == null) {
-            return null;
-        }
-
-        boolean valid = block.getType().name().endsWith("_BUTTON");
-        return new Detonator(location, block, valid);
-    }
 }
