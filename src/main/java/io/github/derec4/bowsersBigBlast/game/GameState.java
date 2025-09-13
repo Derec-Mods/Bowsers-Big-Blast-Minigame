@@ -1,18 +1,36 @@
 package io.github.derec4.bowsersBigBlast.game;
 
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
-import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.Bukkit;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * // Game Structure:
+ * // 1. Wait for enough players to join (minPlayers).
+ * // 2. Start the game when ready.
+ * // 3. Repeat rounds until only one player remains:
+ * //    a. Spawn detonators (one is randomly unlucky).
+ * //    b. For each player in turn:
+ * //       i. Player selects a detonator.
+ * //       ii. Check if detonator is unlucky.
+ * //           - If unlucky: eliminate player, trigger explosion.
+ * //           - If safe: continue.
+ * //    c. Remove eliminated players from the round.
+ * //    d. Prepare for next round (reset detonators, update player list).
+ * // 4. Declare the last remaining player as the winner.
+ * // 5. Reset game state for next game.
+ */
 public class GameState {
     private static GameState instance;
     private boolean isGameRunning = false;
     private int maxPlayers = 6;
-    private int minPlayers = 4;
-    private List<GamePlayer> currentPlayers = new ArrayList<>();
+    private final int minPlayers = 4;
+    private final List<GamePlayer> currentPlayers = new ArrayList<>();
 
-    private GameState() {}
+    private GameState() {
+    }
 
     public static GameState getInstance() {
         if (instance == null) {

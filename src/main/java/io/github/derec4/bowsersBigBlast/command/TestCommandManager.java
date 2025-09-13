@@ -162,6 +162,7 @@ public class TestCommandManager implements TabExecutor {
         if (!command.getName().equalsIgnoreCase("bbtest")) {
             return Collections.emptyList();
         }
+
         List<String> subcommands = Arrays.asList(
             "testCelebration",
             "revealDetonator",
@@ -170,6 +171,7 @@ public class TestCommandManager implements TabExecutor {
             "testcountdowntimer",
             "teststartgame"
         );
+
         if (args.length == 1) {
             String partial = args[0].toLowerCase();
             List<String> matches = new ArrayList<>();
@@ -180,6 +182,7 @@ public class TestCommandManager implements TabExecutor {
             }
             return matches;
         }
+
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("testspawndetonators")) {
                 List<String> nums = new ArrayList<>();

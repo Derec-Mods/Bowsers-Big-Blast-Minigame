@@ -1,8 +1,10 @@
 package io.github.derec4.bowsersBigBlast.listener;
 
+import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -38,17 +40,18 @@ public class DetonatorListener implements Listener {
             bukkitLoc.getZ()
         );
 
-        // Use DetonatorManager singleton for lookup
-        Detonator detonator = io.github.derec4.bowsersBigBlast.game.DetonatorManager.getInstance().getDetonatorByBlock(clicked);
+        Detonator detonator = DetonatorManager.getInstance().getDetonatorByBlock(clicked);
 
         if (detonator != null) {
             Bukkit.getLogger().info("Is detonator: " + detonator.isBomb());
             if (detonator.isBomb()) {
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
                 event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 40, 100, false, false, false));
+
                 Location tntLoc = event.getPlayer().getLocation().clone().add(0, 10, 0);
-                org.bukkit.entity.TNTPrimed tnt = (org.bukkit.entity.TNTPrimed) tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
+                TNTPrimed tnt = tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
                 tnt.setFuseTicks(40);
+
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
         } else {
