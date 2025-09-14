@@ -66,6 +66,9 @@ public class TestCommandManager implements TabExecutor {
             case "teststartgame":
                 handleTestStartGame(sender);
                 break;
+            case "startgame":
+                handleStartGame(sender);
+                break;
             default:
                 sender.sendMessage("Unknown test command. Usage: /bbtest [thing u want to debug]");
                 break;
@@ -157,6 +160,21 @@ public class TestCommandManager implements TabExecutor {
         GameState.getInstance().startGame();
     }
 
+    private void handleStartGame(CommandSender sender) {
+        if (sender instanceof Player player) {
+            // Set the center location for detonator spawning
+            GameState.getInstance().setCenterLocation(player.getLocation());
+            sender.sendMessage("Center location set to your current position.");
+            // Initialize game players if needed
+            BowsersBigBlast.initializeGamePlayers();
+            // Start the game
+            GameState.getInstance().startGame();
+            sender.sendMessage("Bowser's Big Blast game started!");
+        } else {
+            sender.sendMessage("Only players can start the game.");
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!command.getName().equalsIgnoreCase("bbtest")) {
@@ -169,7 +187,8 @@ public class TestCommandManager implements TabExecutor {
             "testDetonator",
             "testspawndetonators",
             "testcountdowntimer",
-            "teststartgame"
+            "teststartgame",
+            "startgame"
         );
 
         if (args.length == 1) {
