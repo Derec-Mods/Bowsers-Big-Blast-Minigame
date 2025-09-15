@@ -3,6 +3,7 @@ package io.github.derec4.bowsersBigBlast.game;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
@@ -22,23 +23,6 @@ public class DetonatorManager {
         return instance;
     }
 
-    public Detonator getDetonatorByBlock(Block block) {
-        if (block == null) return null;
-
-        Location bukkitLoc = block.getLocation();
-        DetonatorLocation loc = new DetonatorLocation(
-            bukkitLoc.getWorld().getName(),
-            bukkitLoc.getX(),
-            bukkitLoc.getY(),
-            bukkitLoc.getZ()
-        );
-
-        return detonatorMap.get(loc);
-    }
-
-    /**
-     * Spawns a single detonator at the given location with button
-     */
     public void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world, boolean isUnlucky) {
         BlockUtils.placeDetonatorBlock(woolLoc, woolType, buttonType);
         Location buttonLoc = woolLoc.clone().add(0, 1, 0);
@@ -51,6 +35,24 @@ public class DetonatorManager {
         );
         Detonator detonator = new Detonator(detLoc, buttonBlock, isUnlucky);
         detonatorMap.put(detLoc, detonator);
+
+        Bukkit.getLogger().info("Detonator ADDED: " + detLoc.getWorld() + " " + detLoc.getX() + "," + detLoc.getY() +
+                "," + detLoc.getZ());
+    }
+
+    public Detonator getDetonatorByBlock(Block block) {
+        if (block == null) return null;
+
+        Location bukkitLoc = block.getLocation();
+        DetonatorLocation loc = new DetonatorLocation(
+            bukkitLoc.getWorld().getName(),
+            block.getX(),
+            block.getY(),
+            block.getZ()
+        );
+
+        Bukkit.getLogger().info("Detonator LOOKUP: " + loc.getWorld() + " " + loc.getX() + "," + loc.getY() + "," + loc.getZ());
+        return detonatorMap.get(loc);
     }
 
     /**

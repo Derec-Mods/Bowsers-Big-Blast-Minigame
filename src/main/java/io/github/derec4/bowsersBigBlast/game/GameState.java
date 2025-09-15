@@ -152,12 +152,12 @@ public class GameState {
         currentPlayers.remove(eliminatedPlayer);
         playerEliminatedThisRound = true;
         Bukkit.getLogger().info("Player eliminated: " + eliminatedPlayer.getName());
+
         if (currentPlayers.size() == 1) {
             endGame();
         } else {
             // The next player is the one after the eliminated player
-            int nextPlayerIndex = eliminatedIndex;
-            endRound(nextPlayerIndex);
+            endRound(eliminatedIndex + 1);
         }
     }
 
@@ -173,9 +173,11 @@ public class GameState {
     public void endRound(int nextPlayerIndex) {
         roundActive = false;
         round++;
+
         if (playerEliminatedThisRound) {
             currentDetonatorCount = currentPlayers.size();
         }
+
         // else, keep same detonator count
         Bukkit.getLogger().info("Round ended. Next round: " + round);
         startRound(nextPlayerIndex);
@@ -186,9 +188,11 @@ public class GameState {
         isGameRunning = false;
         Bukkit.getLogger().info("Game over! Winner: " + currentPlayers.get(0).getName());
         Player winner = Bukkit.getPlayer(currentPlayers.get(0).getId());
+
         if (winner != null) {
             Bukkit.getPluginManager().callEvent(new MinigameWinEvent(winner));
         }
+
         reset();
     }
 }

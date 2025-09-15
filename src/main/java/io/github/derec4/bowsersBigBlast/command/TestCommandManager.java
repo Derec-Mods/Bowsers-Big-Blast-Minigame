@@ -53,9 +53,6 @@ public class TestCommandManager implements TabExecutor {
             case "celebration":
                 handleTestCelebration(sender);
                 break;
-            case "revealdetonator":
-                handleRevealDetonator(sender);
-                break;
             case "detonator":
                 handleTestDetonator(sender);
                 break;
@@ -81,11 +78,6 @@ public class TestCommandManager implements TabExecutor {
         } else {
             sender.sendMessage("Only players can test celebration.");
         }
-    }
-
-    private void handleRevealDetonator(CommandSender sender) {
-        // TODO: Implement revealDetonator logic
-        sender.sendMessage("Test: revealDetonator not implemented yet.");
     }
 
     private void handleTestDetonator(CommandSender sender) {

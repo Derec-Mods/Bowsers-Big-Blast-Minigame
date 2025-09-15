@@ -4,6 +4,7 @@ import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
 import io.github.derec4.bowsersBigBlast.game.GameState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
@@ -26,50 +27,64 @@ public class DetonatorListener implements Listener {
         }
 
         Block clicked = event.getClickedBlock();
+        Bukkit.getLogger().info("DEBUG: Clicked block: " + (clicked != null ? clicked.getType() + " at " + clicked.getLocation() : "null"));
 
         if (clicked == null) {
             return;
         }
 
         if (!clicked.getType().name().endsWith("_BUTTON")) {
+            Bukkit.getLogger().info("DEBUG: Clicked block is not a button");
             return;
         }
 
-        Location bukkitLoc = clicked.getLocation();
-
-        DetonatorLocation loc = new DetonatorLocation(
-            bukkitLoc.getWorld().getName(),
-            bukkitLoc.getX(),
-            bukkitLoc.getY(),
-            bukkitLoc.getZ()
-        );
-
         Detonator detonator = DetonatorManager.getInstance().getDetonatorByBlock(clicked);
+        Bukkit.getLogger().info("DEBUG: Detonator lookup result: " + (detonator != null ? detonator.toString() : "null"));
 
         if (detonator == null) {
             return;
         }
 
         // Find the GamePlayer for the interacting Bukkit player
-        GamePlayer gamePlayer = null;
+        final GamePlayer gamePlayer;
         UUID playerUuid = event.getPlayer().getUniqueId();
+        GamePlayer foundPlayer = null;
+
         for (GamePlayer gp : GameState.getInstance().getCurrentPlayers()) {
             if (gp.getId().equals(playerUuid)) {
-                gamePlayer = gp;
+                foundPlayer = gp;
                 break;
             }
         }
 
+        gamePlayer = foundPlayer;
+
         if (gamePlayer != null) {
             Bukkit.getLogger().info("Is detonator: " + detonator.isBomb());
             if (detonator.isBomb()) {
-                event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
-                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 40, 100, false, false, false));
-                Location tntLoc = event.getPlayer().getLocation().clone().add(0, 10, 0);
-                TNTPrimed tnt = tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
-                tnt.setFuseTicks(40);
-                event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                GameState.getInstance().onPlayerEliminated(gamePlayer);
+                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
+                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 100, false, false, false));
+                // Countdown: 3, 2, 1 (red titles)
+                for (int i = 0; i < 3; i++) {
+                    int count = 3 - i;
+                    Bukkit.getScheduler().runTaskLater(
+                        Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
+                        () -> event.getPlayer().sendTitle("§c" + count, "", 0, 20, 0),
+                        i * 20L
+                    );
+                }
+
+                Bukkit.getScheduler().runTaskLater(
+                    Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
+                    () -> {
+                        Location tntLoc = event.getPlayer().getLocation().clone().add(0, 10, 0);
+                        TNTPrimed tnt = tntLoc.getWorld().spawn(tntLoc, TNTPrimed.class);
+                        tnt.setFuseTicks(40);
+                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                        GameState.getInstance().onPlayerEliminated(gamePlayer);
+                    },
+                    60L // 3 seconds
+                );
             } else {
                 GameState.getInstance().onPlayerSafe();
             }
