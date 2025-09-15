@@ -45,6 +45,9 @@ public class DetonatorListener implements Listener {
             return;
         }
 
+        // reset countdown meaning they interacted
+        GameState.getInstance().cancelCountdown();
+
         // Find the GamePlayer for the interacting Bukkit player
         final GamePlayer gamePlayer;
         UUID playerUuid = event.getPlayer().getUniqueId();

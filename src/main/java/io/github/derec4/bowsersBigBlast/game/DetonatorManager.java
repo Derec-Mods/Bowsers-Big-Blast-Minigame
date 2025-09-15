@@ -125,4 +125,38 @@ public class DetonatorManager {
             }
         }
     }
+
+    /**
+     * Randomly selects a detonator for the player and simulates pressing it.
+     */
+    public void autoSelectDetonatorForPlayer(Player player) {
+        List<Detonator> available = new ArrayList<>(detonatorMap.values());
+
+        if (available.isEmpty()) {
+            Bukkit.getLogger().warning("No detonators available for auto-select.");
+            return;
+        }
+
+        Random rand = new Random();
+        Detonator chosen = available.get(rand.nextInt(available.size()));
+        Bukkit.getLogger().info("Auto-selecting detonator for player: " + player.getName() + " -> " + chosen);
+        // Simulate the player pressing the button
+        if (chosen.isBomb()) {
+            // Unlucky: trigger elimination logic
+            player.sendTitle("§cUnlucky!", "", 10, 40, 10);
+            GameState.getInstance().onPlayerEliminated(GameState.getInstance().getCurrentPlayers().stream()
+                .filter(gp -> gp.getId().equals(player.getUniqueId())).findFirst().orElse(null));
+        } else {
+            // Safe: trigger safe logic
+            GameState.getInstance().onPlayerSafe();
+        }
+    }
+
+    /**
+     * Clears all detonators from the map (for new round).
+     */
+    public void clearDetonators() {
+        detonatorMap.clear();
+        Bukkit.getLogger().info("Detonator map cleared for new round.");
+    }
 }

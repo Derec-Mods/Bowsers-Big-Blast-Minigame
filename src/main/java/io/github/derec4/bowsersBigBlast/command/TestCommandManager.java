@@ -112,7 +112,8 @@ public class TestCommandManager implements TabExecutor {
                     count = Math.max(1, Math.min(10, Integer.parseInt(args[1])));
                 } catch (NumberFormatException ignored) {}
             }
-            io.github.derec4.bowsersBigBlast.game.DetonatorManager.getInstance().spawnDetonators(player, count);
+
+            DetonatorManager.getInstance().spawnDetonators(player, count);
             sender.sendMessage("Spawned " + count + " detonators in front of you.");
         } else {
             sender.sendMessage("Only players can test detonator spawning.");

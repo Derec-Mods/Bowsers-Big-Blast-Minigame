@@ -5,6 +5,8 @@ import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,8 @@ public class GameState {
     private boolean roundActive = false;
     private int currentPlayerIndex = 0;
     private boolean playerEliminatedThisRound = false;
+    private BukkitTask currentCountdownTask = null;
+    private GamePlayer currentTurnPlayer = null;
 
     private GameState() {
     }
@@ -119,16 +123,21 @@ public class GameState {
             Bukkit.getLogger().warning("Center location not set. Cannot start round.");
             return;
         }
-        // No minPlayers check here
+
+        DetonatorManager.getInstance().clearDetonators();
         roundActive = true;
         playerEliminatedThisRound = false;
+
         if (currentDetonatorCount == 0) {
             currentDetonatorCount = currentPlayers.size();
         }
-        Bukkit.getLogger().info("Starting round " + round + " with " + currentDetonatorCount + " detonators.");
+
+
         DetonatorManager.getInstance().spawnDetonators(
                 Objects.requireNonNull(Bukkit.getPlayer(currentPlayers.get(0).getId())), currentDetonatorCount
         );
+
+        Bukkit.getLogger().info("Starting round " + round + " with " + currentDetonatorCount + " detonators.");
         currentPlayerIndex = startingPlayerIndex % currentPlayers.size();
         nextPlayerTurn();
     }
@@ -140,11 +149,32 @@ public class GameState {
         }
 
         GamePlayer player = currentPlayers.get(currentPlayerIndex);
+        currentTurnPlayer = player;
         Player bukkitPlayer = Bukkit.getPlayer(player.getId());
 
         if (bukkitPlayer != null) {
             bukkitPlayer.sendTitle(bukkitPlayer.getName(), "Your turn!", 10, 40, 10);
             Bukkit.getLogger().info("Player turn: " + bukkitPlayer.getName());
+            // Start 10 second countdown
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("BowsersBigBlast");
+            if (currentCountdownTask != null) {
+                currentCountdownTask.cancel();
+            }
+            currentCountdownTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                // If player hasn't pressed a button, auto-select a detonator
+                Bukkit.getLogger().info("Player " + bukkitPlayer.getName() + " ran out of time!");
+                bukkitPlayer.sendTitle("§cOut of time!", "", 10, 40, 10);
+                // Randomly select a detonator for the player
+                DetonatorManager.getInstance().autoSelectDetonatorForPlayer(bukkitPlayer);
+            }, 200L); // 10 seconds
+        }
+    }
+
+    // Call this from DetonatorListener when player interacts
+    public void cancelCountdown() {
+        if (currentCountdownTask != null) {
+            currentCountdownTask.cancel();
+            currentCountdownTask = null;
         }
     }
 
@@ -167,14 +197,19 @@ public class GameState {
             endGame();
             return;
         }
+        // Show green "Safe" title to current player
+        if (currentTurnPlayer != null) {
+            Player bukkitPlayer = Bukkit.getPlayer(currentTurnPlayer.getId());
+            if (bukkitPlayer != null) {
+                bukkitPlayer.sendTitle("§aSafe", "", 10, 40, 10);
+            }
+        }
         // Randomly select the next player (excluding the current player)
         int oldIndex = currentPlayerIndex;
         int nextIndex;
-
         do {
             nextIndex = new Random().nextInt(currentPlayers.size());
         } while (nextIndex == oldIndex && currentPlayers.size() > 1);
-
         currentPlayerIndex = nextIndex;
         nextPlayerTurn();
     }
