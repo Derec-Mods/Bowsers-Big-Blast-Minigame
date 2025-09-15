@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * // Game Structure:
@@ -162,7 +163,19 @@ public class GameState {
     }
 
     public void onPlayerSafe() {
-        currentPlayerIndex++;
+        if (currentPlayers.size() <= 1) {
+            endGame();
+            return;
+        }
+        // Randomly select the next player (excluding the current player)
+        int oldIndex = currentPlayerIndex;
+        int nextIndex;
+
+        do {
+            nextIndex = new Random().nextInt(currentPlayers.size());
+        } while (nextIndex == oldIndex && currentPlayers.size() > 1);
+
+        currentPlayerIndex = nextIndex;
         nextPlayerTurn();
     }
 
