@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,14 +22,26 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             } else if (args.length == 1) {
                 try {
                     int numPlayers = Integer.parseInt(args[0]);
-                    if (numPlayers < GameState.getInstance().getMinPlayers() || numPlayers > GameState.getInstance().getMaxPlayers()) {
-                        sender.sendMessage("Player count must be between 4 and 6.");
+                    if (numPlayers > GameState.getInstance().getMaxPlayers()) {
+                        sender.sendMessage("Player count must be less than or equal to " + GameState.getInstance().getMaxPlayers() + ".");
                         return true;
                     }
+
+                    if (GameState.getInstance().isGameRunning()) {
+                        sender.sendMessage("A game is already running! Use /bowsergame stop to end the current game first.");
+                        return true;
+                    }
+
                     GameState.getInstance().setMaxPlayers(numPlayers);
-                    GameState.getInstance().setGameRunning(true);
+
+                    // Set center location from sender if possible
+                    if (sender instanceof Player player) {
+                        GameState.getInstance().setCenterLocation(player.getLocation());
+                    }
+
                     BowsersBigBlast.initializeGamePlayers();
                     sender.sendMessage("Bowser's Big Blast game started with " + numPlayers + " players.");
+                    GameState.getInstance().setGameRunning(true);
                     GameState.getInstance().startGame();
                     return true;
                 } catch (NumberFormatException e) {

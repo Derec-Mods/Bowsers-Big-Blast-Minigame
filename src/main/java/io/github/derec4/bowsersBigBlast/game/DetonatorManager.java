@@ -24,6 +24,7 @@ public class DetonatorManager {
 
     public Detonator getDetonatorByBlock(Block block) {
         if (block == null) return null;
+
         Location bukkitLoc = block.getLocation();
         DetonatorLocation loc = new DetonatorLocation(
             bukkitLoc.getWorld().getName(),
@@ -31,13 +32,14 @@ public class DetonatorManager {
             bukkitLoc.getY(),
             bukkitLoc.getZ()
         );
+
         return detonatorMap.get(loc);
     }
 
     /**
      * Spawns a single detonator at the given location with button
      */
-    private void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world, boolean isUnlucky) {
+    public void spawnDetonatorAt(Location woolLoc, Material woolType, Material buttonType, World world, boolean isUnlucky) {
         BlockUtils.placeDetonatorBlock(woolLoc, woolType, buttonType);
         Location buttonLoc = woolLoc.clone().add(0, 1, 0);
         Block buttonBlock = world.getBlockAt(buttonLoc);
@@ -55,7 +57,7 @@ public class DetonatorManager {
      * Returns the closest cardinal direction (N, E, S, W) as a normalized Vector based on the player's yaw.
      * generated this using AI because i was too lazy to do the math
      */
-    private Vector getCardinalDirection(Location loc) {
+    public Vector getCardinalDirection(Location loc) {
         float yaw = loc.getYaw();
         yaw = (yaw % 360 + 360) % 360; // Normalize yaw to [0, 360)
         if ((yaw >= 315 || yaw < 45)) {

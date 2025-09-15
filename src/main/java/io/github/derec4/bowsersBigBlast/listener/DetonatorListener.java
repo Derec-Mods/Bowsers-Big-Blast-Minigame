@@ -1,6 +1,7 @@
 package io.github.derec4.bowsersBigBlast.listener;
 
 import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
+import io.github.derec4.bowsersBigBlast.game.GameState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -13,6 +14,9 @@ import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import io.github.derec4.bowsersBigBlast.player.GamePlayer;
+import java.util.UUID;
 
 public class DetonatorListener implements Listener {
     @EventHandler
@@ -42,17 +46,21 @@ public class DetonatorListener implements Listener {
 
         Detonator detonator = DetonatorManager.getInstance().getDetonatorByBlock(clicked);
 
+        if (detonator == null) {
+            return;
+        }
+
         // Find the GamePlayer for the interacting Bukkit player
-        io.github.derec4.bowsersBigBlast.player.GamePlayer gamePlayer = null;
-        java.util.UUID playerUuid = event.getPlayer().getUniqueId();
-        for (io.github.derec4.bowsersBigBlast.player.GamePlayer gp : io.github.derec4.bowsersBigBlast.game.GameState.getInstance().getCurrentPlayers()) {
-            if (gp.getUuid().equals(playerUuid)) {
+        GamePlayer gamePlayer = null;
+        UUID playerUuid = event.getPlayer().getUniqueId();
+        for (GamePlayer gp : GameState.getInstance().getCurrentPlayers()) {
+            if (gp.getId().equals(playerUuid)) {
                 gamePlayer = gp;
                 break;
             }
         }
 
-        if (detonator != null && gamePlayer != null) {
+        if (gamePlayer != null) {
             Bukkit.getLogger().info("Is detonator: " + detonator.isBomb());
             if (detonator.isBomb()) {
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
@@ -61,11 +69,9 @@ public class DetonatorListener implements Listener {
                 TNTPrimed tnt = tntLoc.getWorld().spawn(tntLoc, org.bukkit.entity.TNTPrimed.class);
                 tnt.setFuseTicks(40);
                 event.getPlayer().playSound(event.getPlayer().getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                // Notify GameState of elimination
-                io.github.derec4.bowsersBigBlast.game.GameState.getInstance().onPlayerEliminated(gamePlayer);
+                GameState.getInstance().onPlayerEliminated(gamePlayer);
             } else {
-                // Notify GameState of safe turn
-                io.github.derec4.bowsersBigBlast.game.GameState.getInstance().onPlayerSafe();
+                GameState.getInstance().onPlayerSafe();
             }
         } else {
             Bukkit.getLogger().warning("Detonator or GamePlayer is null");

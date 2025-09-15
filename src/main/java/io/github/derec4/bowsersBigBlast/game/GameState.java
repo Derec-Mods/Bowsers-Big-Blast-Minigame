@@ -1,12 +1,14 @@
 package io.github.derec4.bowsersBigBlast.game;
 
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
+import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * // Game Structure:
@@ -26,10 +28,10 @@ import java.util.List;
  */
 public class GameState {
     private static GameState instance;
+    // Removed minPlayers field and all minPlayers checks
+    private final List<GamePlayer> currentPlayers = new ArrayList<>();
     private boolean isGameRunning = false;
     private int maxPlayers = 6;
-    private final int minPlayers = 4;
-    private final List<GamePlayer> currentPlayers = new ArrayList<>();
     private Location centerLocation; // Center for detonator spawning
     private int currentDetonatorCount = 0; // Detonators for current round
     private int round = 1;
@@ -63,10 +65,6 @@ public class GameState {
         this.maxPlayers = maxPlayers;
     }
 
-    public int getMinPlayers() {
-        return minPlayers;
-    }
-
     public List<GamePlayer> getCurrentPlayers() {
         return currentPlayers;
     }
@@ -77,12 +75,12 @@ public class GameState {
         maxPlayers = 6;
     }
 
-    public void setCenterLocation(Location loc) {
-        this.centerLocation = loc;
-    }
-
     public Location getCenterLocation() {
         return centerLocation;
+    }
+
+    public void setCenterLocation(Location loc) {
+        this.centerLocation = loc;
     }
 
     public int getCurrentDetonatorCount() {
@@ -102,36 +100,35 @@ public class GameState {
     }
 
     public void startGame() {
-        if (currentPlayers.size() < minPlayers) {
-            Bukkit.getLogger().warning("Not enough players to start the game.");
-            return;
-        }
+        // Removed minPlayers check
         setGameRunning(true);
         round = 1;
         currentDetonatorCount = currentPlayers.size();
         Bukkit.getLogger().info("Game started with " + currentDetonatorCount + " detonators.");
+        System.out.println(currentPlayers);
         startRound();
     }
 
     public void startRound() {
+        startRound(0);
+    }
+
+    public void startRound(int startingPlayerIndex) {
         if (centerLocation == null) {
             Bukkit.getLogger().warning("Center location not set. Cannot start round.");
             return;
         }
-        if (currentPlayers.size() < minPlayers) {
-            Bukkit.getLogger().warning("Not enough players to start the round.");
-            return;
-        }
+        // No minPlayers check here
         roundActive = true;
         playerEliminatedThisRound = false;
         if (currentDetonatorCount == 0) {
             currentDetonatorCount = currentPlayers.size();
         }
         Bukkit.getLogger().info("Starting round " + round + " with " + currentDetonatorCount + " detonators.");
-        io.github.derec4.bowsersBigBlast.game.DetonatorManager.getInstance().spawnDetonators(
-            Bukkit.getPlayer(currentPlayers.get(0).getUuid()), currentDetonatorCount
+        DetonatorManager.getInstance().spawnDetonators(
+                Objects.requireNonNull(Bukkit.getPlayer(currentPlayers.get(0).getId())), currentDetonatorCount
         );
-        currentPlayerIndex = 0;
+        currentPlayerIndex = startingPlayerIndex % currentPlayers.size();
         nextPlayerTurn();
     }
 
@@ -140,24 +137,27 @@ public class GameState {
             endRound();
             return;
         }
+
         GamePlayer player = currentPlayers.get(currentPlayerIndex);
-        Player bukkitPlayer = Bukkit.getPlayer(player.getUuid());
+        Player bukkitPlayer = Bukkit.getPlayer(player.getId());
+
         if (bukkitPlayer != null) {
-            bukkitPlayer.sendTitle("", "Your turn!", 10, 40, 10);
+            bukkitPlayer.sendTitle(bukkitPlayer.getName(), "Your turn!", 10, 40, 10);
             Bukkit.getLogger().info("Player turn: " + bukkitPlayer.getName());
         }
-        // Wait for player interaction (handled in listener)
     }
 
     public void onPlayerEliminated(GamePlayer eliminatedPlayer) {
+        int eliminatedIndex = currentPlayers.indexOf(eliminatedPlayer);
         currentPlayers.remove(eliminatedPlayer);
         playerEliminatedThisRound = true;
         Bukkit.getLogger().info("Player eliminated: " + eliminatedPlayer.getName());
         if (currentPlayers.size() == 1) {
             endGame();
         } else {
-            currentPlayerIndex++;
-            nextPlayerTurn();
+            // The next player is the one after the eliminated player
+            int nextPlayerIndex = eliminatedIndex;
+            endRound(nextPlayerIndex);
         }
     }
 
@@ -167,6 +167,10 @@ public class GameState {
     }
 
     public void endRound() {
+        endRound(0);
+    }
+
+    public void endRound(int nextPlayerIndex) {
         roundActive = false;
         round++;
         if (playerEliminatedThisRound) {
@@ -174,16 +178,16 @@ public class GameState {
         }
         // else, keep same detonator count
         Bukkit.getLogger().info("Round ended. Next round: " + round);
-        startRound();
+        startRound(nextPlayerIndex);
     }
 
     public void endGame() {
         roundActive = false;
         isGameRunning = false;
         Bukkit.getLogger().info("Game over! Winner: " + currentPlayers.get(0).getName());
-        org.bukkit.entity.Player winner = Bukkit.getPlayer(currentPlayers.get(0).getUuid());
+        Player winner = Bukkit.getPlayer(currentPlayers.get(0).getId());
         if (winner != null) {
-            Bukkit.getPluginManager().callEvent(new io.github.derec4.bowsersBigBlast.event.MinigameWinEvent(winner));
+            Bukkit.getPluginManager().callEvent(new MinigameWinEvent(winner));
         }
         reset();
     }

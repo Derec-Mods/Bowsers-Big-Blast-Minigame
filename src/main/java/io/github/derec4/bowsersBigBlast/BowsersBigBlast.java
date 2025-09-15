@@ -47,8 +47,9 @@ public final class BowsersBigBlast extends JavaPlugin {
     public static void initializeGamePlayers() {
         GameState.getInstance().getCurrentPlayers().clear();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE) {
-                GameState.getInstance().getCurrentPlayers().add(new GamePlayer(player));
+            if (player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE || player.getGameMode() == GameMode.CREATIVE) {
+                GameState.getInstance().getCurrentPlayers().add(new GamePlayer(player, player.getUniqueId(),
+                        player.getName()));
             }
         }
     }

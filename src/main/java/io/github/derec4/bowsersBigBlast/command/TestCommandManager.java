@@ -11,6 +11,7 @@ import io.github.derec4.bowsersBigBlast.util.BlockUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Attachable;
 import org.bukkit.block.data.BlockData;
@@ -19,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,27 +50,22 @@ public class TestCommandManager implements TabExecutor {
             return true;
         }
         switch (args[0].toLowerCase()) {
-            case "testcelebration":
+            case "celebration":
                 handleTestCelebration(sender);
                 break;
             case "revealdetonator":
                 handleRevealDetonator(sender);
                 break;
-            case "testdetonator":
+            case "detonator":
                 handleTestDetonator(sender);
                 break;
-            case "testspawndetonators":
+            case "spawndetonators":
                 handleTestSpawnDetonators(sender, args);
                 break;
-            case "testcountdowntimer":
+            case "countdowntimer":
                 handleTestCountdownTimer(sender, args);
                 break;
-            case "teststartgame":
-                handleTestStartGame(sender);
-                break;
-            case "startgame":
-                handleStartGame(sender);
-                break;
+            // Removed teststartgame and startgame cases
             default:
                 sender.sendMessage("Unknown test command. Usage: /bbtest [thing u want to debug]");
                 break;
@@ -93,26 +90,22 @@ public class TestCommandManager implements TabExecutor {
 
     private void handleTestDetonator(CommandSender sender) {
         if (sender instanceof Player player) {
-            Location baseLoc = player.getLocation().add(0, 0, 2); // 2 blocks ahead
-            org.bukkit.World world = baseLoc.getWorld();
-            if (world == null) {
-                sender.sendMessage("World not found.");
-                return;
-            }
+            World world = player.getWorld();
+            Location baseLoc = player.getLocation();
+            Vector direction = DetonatorManager.getInstance().getCardinalDirection(baseLoc);
+            Location woolLoc = baseLoc.clone().add(direction.clone().multiply(2));
+            woolLoc.setY(baseLoc.getBlockY());
+
             Material chosenWool = BlockUtils.WOOLS.get((int) (Math.random() * BlockUtils.WOOLS.size()));
             Material chosenButton = BlockUtils.BUTTONS.get((int) (Math.random() * BlockUtils.BUTTONS.size()));
-            BlockUtils.placeDetonatorBlock(baseLoc, chosenWool, chosenButton);
-            Location buttonLoc = baseLoc.clone().add(0, 1, 0);
+
+            DetonatorManager.getInstance().spawnDetonatorAt(woolLoc, chosenWool, chosenButton, world, false);
+
+            Location buttonLoc = woolLoc.clone().add(0, 1, 0);
             Block buttonBlock = world.getBlockAt(buttonLoc);
-            DetonatorLocation detLoc = new DetonatorLocation(
-                    buttonBlock.getWorld().getName(),
-                    buttonBlock.getX(),
-                    buttonBlock.getY(),
-                    buttonBlock.getZ()
-            );
-            // Use DetonatorManager singleton for lookup
             Detonator detonator = DetonatorManager.getInstance().getDetonatorByBlock(buttonBlock);
-            sender.sendMessage("Spawned at " + baseLoc.getBlockX() + "," + baseLoc.getBlockY() + "," + baseLoc.getBlockZ());
+
+            sender.sendMessage("Spawned at " + woolLoc.getBlockX() + "," + woolLoc.getBlockY() + "," + woolLoc.getBlockZ());
             sender.sendMessage("Detonator isBomb: " + (detonator != null ? detonator.isBomb() : "null"));
         } else {
             sender.sendMessage("Only players can test detonator.");
@@ -150,31 +143,6 @@ public class TestCommandManager implements TabExecutor {
         }
     }
 
-    private void handleTestStartGame(CommandSender sender) {
-        GameState.getInstance().setMaxPlayers(1);
-        BowsersBigBlast.initializeGamePlayers();
-        int actualPlayers = GameState.getInstance().getCurrentPlayers().size();
-        GameState.getInstance().setMaxPlayers(actualPlayers);
-        GameState.getInstance().setGameRunning(true);
-        sender.sendMessage("Test: Bowser's Big Blast game started with " + actualPlayers + " players (minPlayers set to 1).");
-        GameState.getInstance().startGame();
-    }
-
-    private void handleStartGame(CommandSender sender) {
-        if (sender instanceof Player player) {
-            // Set the center location for detonator spawning
-            GameState.getInstance().setCenterLocation(player.getLocation());
-            sender.sendMessage("Center location set to your current position.");
-            // Initialize game players if needed
-            BowsersBigBlast.initializeGamePlayers();
-            // Start the game
-            GameState.getInstance().startGame();
-            sender.sendMessage("Bowser's Big Blast game started!");
-        } else {
-            sender.sendMessage("Only players can start the game.");
-        }
-    }
-
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!command.getName().equalsIgnoreCase("bbtest")) {
@@ -186,9 +154,8 @@ public class TestCommandManager implements TabExecutor {
             "revealDetonator",
             "testDetonator",
             "testspawndetonators",
-            "testcountdowntimer",
-            "teststartgame",
-            "startgame"
+            "testcountdowntimer"
+            // Remove tab completion for teststartgame and startgame
         );
 
         if (args.length == 1) {
