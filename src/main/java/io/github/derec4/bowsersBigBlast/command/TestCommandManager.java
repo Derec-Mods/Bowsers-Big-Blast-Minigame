@@ -1,20 +1,15 @@
 package io.github.derec4.bowsersBigBlast.command;
 
-import io.github.derec4.bowsersBigBlast.BowsersBigBlast;
 import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
 import io.github.derec4.bowsersBigBlast.game.CountdownTimer;
 import io.github.derec4.bowsersBigBlast.game.DetonatorManager;
-import io.github.derec4.bowsersBigBlast.game.GameState;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
-import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.Attachable;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -110,7 +105,8 @@ public class TestCommandManager implements TabExecutor {
             if (args.length > 1) {
                 try {
                     count = Math.max(1, Math.min(10, Integer.parseInt(args[1])));
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
 
             DetonatorManager.getInstance().spawnDetonators(player, count);
@@ -126,7 +122,8 @@ public class TestCommandManager implements TabExecutor {
             if (args.length > 1) {
                 try {
                     seconds = Math.max(1, Math.min(60, Integer.parseInt(args[1])));
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
             CountdownTimer timer = new CountdownTimer(plugin, Collections.singleton(player));
             timer.start(seconds);
@@ -143,12 +140,12 @@ public class TestCommandManager implements TabExecutor {
         }
 
         List<String> subcommands = Arrays.asList(
-            "testCelebration",
-            "revealDetonator",
-            "testDetonator",
-            "testspawndetonators",
-            "testcountdowntimer"
-            // Remove tab completion for teststartgame and startgame
+                "testCelebration",
+                "revealDetonator",
+                "testDetonator",
+                "testspawndetonators",
+                "testcountdowntimer"
+                // Remove tab completion for teststartgame and startgame
         );
 
         if (args.length == 1) {
@@ -165,12 +162,16 @@ public class TestCommandManager implements TabExecutor {
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("testspawndetonators")) {
                 List<String> nums = new ArrayList<>();
-                for (int i = 1; i <= 10; i++) nums.add(String.valueOf(i));
+                for (int i = 1; i <= 10; i++) {
+                    nums.add(String.valueOf(i));
+                }
                 return nums;
             }
             if (args[0].equalsIgnoreCase("testcountdowntimer")) {
                 List<String> nums = new ArrayList<>();
-                for (int i = 1; i <= 60; i++) nums.add(String.valueOf(i));
+                for (int i = 1; i <= 60; i++) {
+                    nums.add(String.valueOf(i));
+                }
                 return nums;
             }
         }
