@@ -31,11 +31,10 @@ import java.util.Random;
  */
 public class GameState {
     private static GameState instance;
-    // Removed minPlayers field and all minPlayers checks
     private final List<GamePlayer> currentPlayers = new ArrayList<>();
     private boolean isGameRunning = false;
     private int maxPlayers = 6;
-    private Location centerLocation; // Center for detonator spawning
+    private Location centerLocation;
     private int currentDetonatorCount = 0; // Detonators for current round
     private int round = 1;
     private boolean roundActive = false;
@@ -155,15 +154,19 @@ public class GameState {
         if (bukkitPlayer != null) {
             bukkitPlayer.sendTitle(bukkitPlayer.getName(), "Your turn!", 10, 40, 10);
             Bukkit.getLogger().info("Player turn: " + bukkitPlayer.getName());
+
             // Start 10 second countdown
             Plugin plugin = Bukkit.getPluginManager().getPlugin("BowsersBigBlast");
+
             if (currentCountdownTask != null) {
                 currentCountdownTask.cancel();
             }
+
+            assert plugin != null;
             currentCountdownTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                // If player hasn't pressed a button, auto-select a detonator
                 Bukkit.getLogger().info("Player " + bukkitPlayer.getName() + " ran out of time!");
                 bukkitPlayer.sendTitle("§cOut of time!", "", 10, 40, 10);
+
                 // Randomly select a detonator for the player
                 DetonatorManager.getInstance().autoSelectDetonatorForPlayer(bukkitPlayer);
             }, 200L); // 10 seconds
@@ -197,19 +200,22 @@ public class GameState {
             endGame();
             return;
         }
-        // Show green "Safe" title to current player
+
         if (currentTurnPlayer != null) {
             Player bukkitPlayer = Bukkit.getPlayer(currentTurnPlayer.getId());
             if (bukkitPlayer != null) {
                 bukkitPlayer.sendTitle("§aSafe", "", 10, 40, 10);
             }
         }
+
         // Randomly select the next player (excluding the current player)
         int oldIndex = currentPlayerIndex;
         int nextIndex;
+
         do {
             nextIndex = new Random().nextInt(currentPlayers.size());
         } while (nextIndex == oldIndex && currentPlayers.size() > 1);
+
         currentPlayerIndex = nextIndex;
         nextPlayerTurn();
     }

@@ -140,14 +140,12 @@ public class DetonatorManager {
         Random rand = new Random();
         Detonator chosen = available.get(rand.nextInt(available.size()));
         Bukkit.getLogger().info("Auto-selecting detonator for player: " + player.getName() + " -> " + chosen);
-        // Simulate the player pressing the button
+
         if (chosen.isBomb()) {
-            // Unlucky: trigger elimination logic
             player.sendTitle("§cUnlucky!", "", 10, 40, 10);
             GameState.getInstance().onPlayerEliminated(GameState.getInstance().getCurrentPlayers().stream()
                 .filter(gp -> gp.getId().equals(player.getUniqueId())).findFirst().orElse(null));
         } else {
-            // Safe: trigger safe logic
             GameState.getInstance().onPlayerSafe();
         }
     }
