@@ -15,6 +15,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BowsersBigBlast extends JavaPlugin {
+    // Config variables
+    public static boolean fixedSpawn = false;
+    public static int spawnX = 0;
+    public static int spawnY = 64;
+    public static int spawnZ = 0;
 
     /**
      * Setup: Players stand around a large bomb with several colored plungers attached.
@@ -28,6 +33,9 @@ public final class BowsersBigBlast extends JavaPlugin {
      */
     @Override
     public void onEnable() {
+        // Load config
+        saveDefaultConfig();
+        reloadConfigValues();
 
         // Plugin startup logic
         getCommand("bbtest").setExecutor((CommandSender sender, Command command, String label, String[] args) -> {
@@ -37,6 +45,24 @@ public final class BowsersBigBlast extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DetonatorListener(), this);
         getCommand("bowsergame").setExecutor(new CommandManager());
         getCommand("bowsergame").setTabCompleter(new CommandManager());
+        // Register reload command
+        getCommand("bowserreload").setExecutor((sender, command, label, args) -> {
+            reloadConfig();
+            sender.sendMessage("§aBowsersBigBlast config reloaded!");
+            return true;
+        });
+    }
+
+    public void reloadConfig() {
+        reloadConfig();
+        reloadConfigValues();
+    }
+
+    private void reloadConfigValues() {
+        fixedSpawn = getConfig().getBoolean("fixedspawn", false);
+        spawnX = getConfig().getInt("spawn_x", 0);
+        spawnY = getConfig().getInt("spawn_y", 64);
+        spawnZ = getConfig().getInt("spawn_z", 0);
     }
 
     @Override

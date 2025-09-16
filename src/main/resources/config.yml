@@ -1,0 +1,6 @@
+# BowsersBigBlast config.yml
+fixedspawn: false
+spawn_x: 0
+spawn_y: 64
+spawn_z: 0
+
