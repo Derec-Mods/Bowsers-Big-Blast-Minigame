@@ -7,6 +7,7 @@ import io.github.derec4.bowsersBigBlast.listener.OnMinigameEnd;
 import io.github.derec4.bowsersBigBlast.listener.DetonatorListener;
 import io.github.derec4.bowsersBigBlast.game.GameState;
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
+import io.github.derec4.bowsersBigBlast.command.ConfigReloadCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -41,21 +42,13 @@ public final class BowsersBigBlast extends JavaPlugin {
         getCommand("bbtest").setExecutor((CommandSender sender, Command command, String label, String[] args) -> {
             return new TestCommandManager(this).onCommand(sender, command, label, args);
         });
+
         getServer().getPluginManager().registerEvents(new OnMinigameEnd(), this);
         getServer().getPluginManager().registerEvents(new DetonatorListener(), this);
+
         getCommand("bowsergame").setExecutor(new CommandManager());
         getCommand("bowsergame").setTabCompleter(new CommandManager());
-        // Register reload command
-        getCommand("bowserreload").setExecutor((sender, command, label, args) -> {
-            reloadConfig();
-            sender.sendMessage("§aBowsersBigBlast config reloaded!");
-            return true;
-        });
-    }
-
-    public void reloadConfig() {
-        reloadConfig();
-        reloadConfigValues();
+        getCommand("bowserreload").setExecutor(new ConfigReloadCommand(this));
     }
 
     private void reloadConfigValues() {
