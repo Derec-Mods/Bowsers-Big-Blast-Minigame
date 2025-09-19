@@ -67,6 +67,7 @@ public class DetonatorListener implements Listener {
             if (detonator.isBomb()) {
                 event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
                 event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 100, false, false, false));
+
                 // Countdown: 3, 2, 1 (red titles)
                 for (int i = 0; i < 3; i++) {
                     int count = 3 - i;

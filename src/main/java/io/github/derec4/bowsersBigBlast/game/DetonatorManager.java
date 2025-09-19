@@ -3,11 +3,8 @@ package io.github.derec4.bowsersBigBlast.game;
 import io.github.derec4.bowsersBigBlast.plunger.Detonator;
 import io.github.derec4.bowsersBigBlast.plunger.DetonatorLocation;
 import io.github.derec4.bowsersBigBlast.util.BlockUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
 import java.util.*;
@@ -154,6 +151,10 @@ public class DetonatorManager {
      * Clears all detonators from the map (for new round).
      */
     public void clearDetonators() {
+        for (DetonatorLocation d : detonatorMap.keySet()) {
+            Bukkit.getWorld(d.getWorld()).spawnParticle(Particle.FLAME, new Location(Bukkit.getWorld(d.getWorld()), d.getX(), d.getY(), d.getZ()), 10);
+        }
+
         detonatorMap.clear();
         Bukkit.getLogger().info("Detonator map cleared for new round.");
     }

@@ -104,7 +104,6 @@ public class GameState {
     }
 
     public void startGame() {
-        // Removed minPlayers check
         setGameRunning(true);
         round = 1;
         currentDetonatorCount = currentPlayers.size();
