@@ -12,3 +12,8 @@ commands:
     usage: /bbtest <testCelebration|revealDetonator>
     permission: bowsersbigblast.bbtest
     permission-message: You do not have permission to use this command.
+  bowsergame:
+    description: Start or stop Bowser's Big Blast minigame
+    usage: /bowsergame <number|stop>
+    permission: bowsersbigblast.start
+    permission-message: You do not have permission to start or stop the game.

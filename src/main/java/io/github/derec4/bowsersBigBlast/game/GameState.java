@@ -1,17 +1,50 @@
 package io.github.derec4.bowsersBigBlast.game;
 
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
+import io.github.derec4.bowsersBigBlast.event.MinigameWinEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
+/**
+ * // Game Structure:
+ * // 1. Wait for enough players to join (minPlayers).
+ * // 2. Start the game when ready.
+ * // 3. Repeat rounds until only one player remains:
+ * //    a. Spawn detonators (one is randomly unlucky).
+ * //    b. For each player in turn:
+ * //       i. Player selects a detonator.
+ * //       ii. Check if detonator is unlucky.
+ * //           - If unlucky: eliminate player, trigger explosion.
+ * //           - If safe: continue.
+ * //    c. Remove eliminated players from the round.
+ * //    d. Prepare for next round (reset detonators, update player list).
+ * // 4. Declare the last remaining player as the winner.
+ * // 5. Reset game state for next game.
+ */
 public class GameState {
     private static GameState instance;
+    private final List<GamePlayer> currentPlayers = new ArrayList<>();
     private boolean isGameRunning = false;
     private int maxPlayers = 6;
-    private int minPlayers = 4;
-    private List<GamePlayer> currentPlayers = new ArrayList<>();
+    private Location centerLocation;
+    private int currentDetonatorCount = 0; // Detonators for current round
+    private int round = 1;
+    private boolean roundActive = false;
+    private int currentPlayerIndex = 0;
+    private boolean playerEliminatedThisRound = false;
+    private BukkitTask currentCountdownTask = null;
+    private GamePlayer currentTurnPlayer = null;
 
-    private GameState() {}
+    private GameState() {
+    }
 
     public static GameState getInstance() {
         if (instance == null) {
@@ -36,10 +69,6 @@ public class GameState {
         this.maxPlayers = maxPlayers;
     }
 
-    public int getMinPlayers() {
-        return minPlayers;
-    }
-
     public List<GamePlayer> getCurrentPlayers() {
         return currentPlayers;
     }
@@ -49,5 +78,175 @@ public class GameState {
         currentPlayers.clear();
         maxPlayers = 6;
     }
-}
 
+    public Location getCenterLocation() {
+        return centerLocation;
+    }
+
+    public void setCenterLocation(Location loc) {
+        this.centerLocation = loc;
+    }
+
+    public int getCurrentDetonatorCount() {
+        return currentDetonatorCount;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public boolean isRoundActive() {
+        return roundActive;
+    }
+
+    public void setRoundActive(boolean active) {
+        this.roundActive = active;
+    }
+
+    public void startGame() {
+        // Removed minPlayers check
+        setGameRunning(true);
+        round = 1;
+        currentDetonatorCount = currentPlayers.size();
+        Bukkit.getLogger().info("Game started with " + currentDetonatorCount + " detonators.");
+        System.out.println(currentPlayers);
+        startRound();
+    }
+
+    public void startRound() {
+        startRound(0);
+    }
+
+    public void startRound(int startingPlayerIndex) {
+        if (centerLocation == null) {
+            Bukkit.getLogger().warning("Center location not set. Cannot start round.");
+            return;
+        }
+
+        DetonatorManager.getInstance().clearDetonators();
+        roundActive = true;
+        playerEliminatedThisRound = false;
+
+        if (currentDetonatorCount == 0) {
+            currentDetonatorCount = currentPlayers.size();
+        }
+
+
+        DetonatorManager.getInstance().spawnDetonators(
+                Objects.requireNonNull(Bukkit.getPlayer(currentPlayers.get(0).getId())), currentDetonatorCount
+        );
+
+        Bukkit.getLogger().info("Starting round " + round + " with " + currentDetonatorCount + " detonators.");
+        currentPlayerIndex = startingPlayerIndex % currentPlayers.size();
+        nextPlayerTurn();
+    }
+
+    public void nextPlayerTurn() {
+        if (currentPlayerIndex >= currentPlayers.size()) {
+            endRound();
+            return;
+        }
+
+        GamePlayer player = currentPlayers.get(currentPlayerIndex);
+        currentTurnPlayer = player;
+        Player bukkitPlayer = Bukkit.getPlayer(player.getId());
+
+        if (bukkitPlayer != null) {
+            bukkitPlayer.sendTitle(bukkitPlayer.getName(), "Your turn!", 10, 40, 10);
+            Bukkit.getLogger().info("Player turn: " + bukkitPlayer.getName());
+
+            // Start 10 second countdown
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("BowsersBigBlast");
+
+            if (currentCountdownTask != null) {
+                currentCountdownTask.cancel();
+            }
+
+            assert plugin != null;
+            currentCountdownTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                Bukkit.getLogger().info("Player " + bukkitPlayer.getName() + " ran out of time!");
+                bukkitPlayer.sendTitle("§cOut of time!", "", 10, 40, 10);
+
+                // Randomly select a detonator for the player
+                DetonatorManager.getInstance().autoSelectDetonatorForPlayer(bukkitPlayer);
+            }, 200L); // 10 seconds
+        }
+    }
+
+    // Call this from DetonatorListener when player interacts
+    public void cancelCountdown() {
+        if (currentCountdownTask != null) {
+            currentCountdownTask.cancel();
+            currentCountdownTask = null;
+        }
+    }
+
+    public void onPlayerEliminated(GamePlayer eliminatedPlayer) {
+        int eliminatedIndex = currentPlayers.indexOf(eliminatedPlayer);
+        currentPlayers.remove(eliminatedPlayer);
+        playerEliminatedThisRound = true;
+        Bukkit.getLogger().info("Player eliminated: " + eliminatedPlayer.getName());
+
+        if (currentPlayers.size() == 1) {
+            endGame();
+        } else {
+            // The next player is the one after the eliminated player
+            endRound(eliminatedIndex + 1);
+        }
+    }
+
+    public void onPlayerSafe() {
+        if (currentPlayers.size() <= 1) {
+            endGame();
+            return;
+        }
+
+        if (currentTurnPlayer != null) {
+            Player bukkitPlayer = Bukkit.getPlayer(currentTurnPlayer.getId());
+            if (bukkitPlayer != null) {
+                bukkitPlayer.sendTitle("§aSafe", "", 10, 40, 10);
+            }
+        }
+
+        // Randomly select the next player (excluding the current player)
+        int oldIndex = currentPlayerIndex;
+        int nextIndex;
+
+        do {
+            nextIndex = new Random().nextInt(currentPlayers.size());
+        } while (nextIndex == oldIndex && currentPlayers.size() > 1);
+
+        currentPlayerIndex = nextIndex;
+        nextPlayerTurn();
+    }
+
+    public void endRound() {
+        endRound(0);
+    }
+
+    public void endRound(int nextPlayerIndex) {
+        roundActive = false;
+        round++;
+
+        if (playerEliminatedThisRound) {
+            currentDetonatorCount = currentPlayers.size();
+        }
+
+        // else, keep same detonator count
+        Bukkit.getLogger().info("Round ended. Next round: " + round);
+        startRound(nextPlayerIndex);
+    }
+
+    public void endGame() {
+        roundActive = false;
+        isGameRunning = false;
+        Bukkit.getLogger().info("Game over! Winner: " + currentPlayers.get(0).getName());
+        Player winner = Bukkit.getPlayer(currentPlayers.get(0).getId());
+
+        if (winner != null) {
+            Bukkit.getPluginManager().callEvent(new MinigameWinEvent(winner));
+        }
+
+        reset();
+    }
+}
