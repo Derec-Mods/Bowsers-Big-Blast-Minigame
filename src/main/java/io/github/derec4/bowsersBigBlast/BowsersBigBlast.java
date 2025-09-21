@@ -5,6 +5,7 @@ import io.github.derec4.bowsersBigBlast.command.CommandManager;
 import io.github.derec4.bowsersBigBlast.command.TestCommandManager;
 import io.github.derec4.bowsersBigBlast.listener.OnMinigameEnd;
 import io.github.derec4.bowsersBigBlast.listener.DetonatorListener;
+import io.github.derec4.bowsersBigBlast.listener.TNTExplosionListener;
 import io.github.derec4.bowsersBigBlast.game.GameState;
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
 import io.github.derec4.bowsersBigBlast.command.ConfigReloadCommand;
@@ -45,6 +46,7 @@ public final class BowsersBigBlast extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new OnMinigameEnd(), this);
         getServer().getPluginManager().registerEvents(new DetonatorListener(), this);
+        getServer().getPluginManager().registerEvents(new TNTExplosionListener(), this);
 
         getCommand("bowsergame").setExecutor(new CommandManager());
         getCommand("bowsergame").setTabCompleter(new CommandManager());

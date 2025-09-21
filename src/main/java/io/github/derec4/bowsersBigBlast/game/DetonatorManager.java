@@ -78,7 +78,7 @@ public class DetonatorManager {
     }
 
     /**
-     * Spawns detonators in front of the player, spaced by 1 block, each with a unique wool and random button.
+     * Spawns detonators in front of the player, spaced by 1 block, each with a unique wool and oak button.
      * @param player The player to spawn in front of
      * @param playerCount Number of detonators to spawn
      */
@@ -104,7 +104,7 @@ public class DetonatorManager {
             // Odd: include center
             for (int offset = -half; offset <= half; offset++) {
                 Material woolType = usedWools.get(woolIndex);
-                Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
+                Material buttonType = Material.OAK_BUTTON; // Use only oak button
                 Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
                 boolean isUnlucky = (woolIndex == unluckyIndex);
 
@@ -116,7 +116,7 @@ public class DetonatorManager {
             for (int offset = -half; offset <= half; offset++) {
                 if (offset == 0) continue;
                 Material woolType = usedWools.get(woolIndex);
-                Material buttonType = BlockUtils.BUTTONS.get(rand.nextInt(BlockUtils.BUTTONS.size()));
+                Material buttonType = Material.OAK_BUTTON; // Use only oak button
                 Location woolLoc = centerLoc.clone().add(left.clone().multiply(offset * 2));
                 boolean isUnlucky = (woolIndex == unluckyIndex);
 
