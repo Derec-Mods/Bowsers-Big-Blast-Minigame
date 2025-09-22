@@ -17,3 +17,8 @@ commands:
     usage: /bowsergame <number|stop>
     permission: bowsersbigblast.start
     permission-message: You do not have permission to start or stop the game.
+  bowserreload:
+    description: Reload Bowser's Big Blast config
+    usage: /bowserreload
+    permission: bowsersbigblast.reload
+    permission-message: You do not have permission to reload the config.

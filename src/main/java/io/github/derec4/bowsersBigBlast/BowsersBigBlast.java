@@ -1,6 +1,5 @@
 package io.github.derec4.bowsersBigBlast;
 
-import io.github.derec4.bowsersBigBlast.command.BowserGameTabCompleter;
 import io.github.derec4.bowsersBigBlast.command.CommandManager;
 import io.github.derec4.bowsersBigBlast.command.TestCommandManager;
 import io.github.derec4.bowsersBigBlast.listener.OnMinigameEnd;
