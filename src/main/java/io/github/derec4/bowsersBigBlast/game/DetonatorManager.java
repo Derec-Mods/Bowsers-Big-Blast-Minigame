@@ -164,7 +164,7 @@ public class DetonatorManager {
             () -> {
                 spawnTNTRain(player.getLocation());
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                GameState.getInstance().onPlayerEliminated(gamePlayer);
+                GameManager.getInstance().onPlayerEliminated(gamePlayer);
             },
             60L // 3 seconds
         );
@@ -211,7 +211,7 @@ public class DetonatorManager {
         Bukkit.getLogger().info("Auto-selecting detonator for player: " + player.getName() + " -> " + chosen);
 
         // Find the GamePlayer for this player
-        GamePlayer gamePlayer = GameState.getInstance().getCurrentPlayers().stream()
+        GamePlayer gamePlayer = GameManager.getInstance().getCurrentPlayers().stream()
             .filter(gp -> gp.getId().equals(player.getUniqueId()))
             .findFirst().orElse(null);
 
@@ -219,7 +219,7 @@ public class DetonatorManager {
             handleUnluckyChoice(player, gamePlayer);
         } else {
             player.sendTitle("§aSafe", "", 10, 40, 10);
-            GameState.getInstance().onPlayerSafe();
+            GameManager.getInstance().onPlayerSafe();
         }
     }
 

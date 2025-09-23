@@ -28,8 +28,8 @@ import java.util.Random;
  * // 4. Declare the last remaining player as the winner.
  * // 5. Reset game state for next game.
  */
-public class GameState {
-    private static GameState instance;
+public class GameManager {
+    private static GameManager instance;
     private final List<GamePlayer> currentPlayers = new ArrayList<>();
     private boolean isGameRunning = false;
     private int maxPlayers = 6;
@@ -42,12 +42,12 @@ public class GameState {
     private CountdownTimer currentCountdownTimer = null;
     private GamePlayer currentTurnPlayer = null;
 
-    private GameState() {
+    private GameManager() {
     }
 
-    public static GameState getInstance() {
+    public static GameManager getInstance() {
         if (instance == null) {
-            instance = new GameState();
+            instance = new GameManager();
         }
         return instance;
     }

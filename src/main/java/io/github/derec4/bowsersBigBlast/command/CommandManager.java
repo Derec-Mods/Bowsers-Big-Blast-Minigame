@@ -1,7 +1,7 @@
 package io.github.derec4.bowsersBigBlast.command;
 
 import io.github.derec4.bowsersBigBlast.BowsersBigBlast;
-import io.github.derec4.bowsersBigBlast.game.GameState;
+import io.github.derec4.bowsersBigBlast.game.GameManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,33 +17,33 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("bowsergame")) {
             if (args.length == 1 && args[0].equalsIgnoreCase("stop")) {
-                GameState.getInstance().reset();
+                GameManager.getInstance().reset();
                 sender.sendMessage("Bowser's Big Blast game stopped.");
                 return true;
             } else if (args.length == 1) {
                 try {
                     int numPlayers = Integer.parseInt(args[0]);
-                    if (numPlayers > GameState.getInstance().getMaxPlayers()) {
-                        sender.sendMessage("Player count must be less than or equal to " + GameState.getInstance().getMaxPlayers() + ".");
+                    if (numPlayers > GameManager.getInstance().getMaxPlayers()) {
+                        sender.sendMessage("Player count must be less than or equal to " + GameManager.getInstance().getMaxPlayers() + ".");
                         return true;
                     }
 
-                    if (GameState.getInstance().isGameRunning()) {
+                    if (GameManager.getInstance().isGameRunning()) {
                         sender.sendMessage("A game is already running! Use /bowsergame stop to end the current game first.");
                         return true;
                     }
 
-                    GameState.getInstance().setMaxPlayers(numPlayers);
+                    GameManager.getInstance().setMaxPlayers(numPlayers);
 
                     // Set center location from sender if possible
                     if (sender instanceof Player player) {
-                        GameState.getInstance().setCenterLocation(player.getLocation());
+                        GameManager.getInstance().setCenterLocation(player.getLocation());
                     }
 
                     BowsersBigBlast.initializeGamePlayers();
                     sender.sendMessage("Bowser's Big Blast game started with " + numPlayers + " players.");
-                    GameState.getInstance().setGameRunning(true);
-                    GameState.getInstance().startGame();
+                    GameManager.getInstance().setGameRunning(true);
+                    GameManager.getInstance().startGame();
                     return true;
                 } catch (NumberFormatException e) {
                     sender.sendMessage("Invalid number of players.");

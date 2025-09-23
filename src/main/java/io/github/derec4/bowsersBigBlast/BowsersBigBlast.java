@@ -5,7 +5,7 @@ import io.github.derec4.bowsersBigBlast.command.TestCommandManager;
 import io.github.derec4.bowsersBigBlast.listener.OnMinigameEnd;
 import io.github.derec4.bowsersBigBlast.listener.DetonatorListener;
 import io.github.derec4.bowsersBigBlast.listener.TNTExplosionListener;
-import io.github.derec4.bowsersBigBlast.game.GameState;
+import io.github.derec4.bowsersBigBlast.game.GameManager;
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
 import io.github.derec4.bowsersBigBlast.command.ConfigReloadCommand;
 import org.bukkit.Bukkit;
@@ -65,10 +65,10 @@ public final class BowsersBigBlast extends JavaPlugin {
     }
 
     public static void initializeGamePlayers() {
-        GameState.getInstance().getCurrentPlayers().clear();
+        GameManager.getInstance().getCurrentPlayers().clear();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE || player.getGameMode() == GameMode.CREATIVE) {
-                GameState.getInstance().getCurrentPlayers().add(new GamePlayer(player, player.getUniqueId(),
+                GameManager.getInstance().getCurrentPlayers().add(new GamePlayer(player, player.getUniqueId(),
                         player.getName()));
             }
         }
