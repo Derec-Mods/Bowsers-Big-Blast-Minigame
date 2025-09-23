@@ -288,6 +288,7 @@ public class GameManager {
     }
 
     public void endGame() {
+        DetonatorManager.getInstance().clearDetonators();
         roundActive = false;
         isGameRunning = false;
         Bukkit.getLogger().info("Game over! Winner: " + currentPlayers.get(0).getName());

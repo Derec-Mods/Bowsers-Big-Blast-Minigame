@@ -28,7 +28,6 @@ public class DetonatorListener implements Listener {
         }
 
         if (!clicked.getType().name().endsWith("_BUTTON")) {
-            Bukkit.getLogger().info("DEBUG: Clicked block is not a button");
             return;
         }
 
