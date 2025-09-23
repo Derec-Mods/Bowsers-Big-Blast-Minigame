@@ -9,6 +9,7 @@ import io.github.derec4.bowsersBigBlast.game.GameManager;
 import io.github.derec4.bowsersBigBlast.player.GamePlayer;
 import io.github.derec4.bowsersBigBlast.command.ConfigReloadCommand;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -50,6 +51,14 @@ public final class BowsersBigBlast extends JavaPlugin {
         getCommand("bowsergame").setExecutor(new CommandManager());
         getCommand("bowsergame").setTabCompleter(new CommandManager());
         getCommand("bowserreload").setExecutor(new ConfigReloadCommand(this));
+
+        Bukkit.getLogger().info("");
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "  |_______|                             " +
+                "  ");
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "  | Derex |     Bowser Big Blast v" + getDescription().getVersion());
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "  |_______|     Running on " + Bukkit.getName() + " - " + Bukkit.getVersion());
+        Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "Developed for YouTuber CheapPickle");
+        Bukkit.getLogger().info("");
     }
 
     private void reloadConfigValues() {
