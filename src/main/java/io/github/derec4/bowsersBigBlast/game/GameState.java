@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ public class GameState {
     private boolean roundActive = false;
     private int currentPlayerIndex = 0;
     private boolean playerEliminatedThisRound = false;
-    private BukkitTask currentCountdownTask = null;
+    private CountdownTimer currentCountdownTimer = null;
     private GamePlayer currentTurnPlayer = null;
 
     private GameState() {
@@ -152,32 +151,83 @@ public class GameState {
         Player bukkitPlayer = Bukkit.getPlayer(player.getId());
 
         if (bukkitPlayer != null) {
-            bukkitPlayer.sendTitle(bukkitPlayer.getName(), "Your turn!", 10, 40, 10);
+            // Show turn announcement to all players
+            showTurnAnnouncementToAllPlayers(bukkitPlayer);
             Bukkit.getLogger().info("Player turn: " + bukkitPlayer.getName());
-
-            // Start 10 second countdown
-            Plugin plugin = Bukkit.getPluginManager().getPlugin("BowsersBigBlast");
-
-            if (currentCountdownTask != null) {
-                currentCountdownTask.cancel();
-            }
-
-            assert plugin != null;
-            currentCountdownTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                Bukkit.getLogger().info("Player " + bukkitPlayer.getName() + " ran out of time!");
-                bukkitPlayer.sendTitle("§cOut of time!", "", 10, 40, 10);
-
-                // Randomly select a detonator for the player
-                DetonatorManager.getInstance().autoSelectDetonatorForPlayer(bukkitPlayer);
-            }, 200L); // 10 seconds
+            startCountdownForAllPlayers(10, player);
         }
     }
 
-    // Call this from DetonatorListener when player interacts
+    /**
+     * Shows turn announcement to all players in the game
+     */
+    private void showTurnAnnouncementToAllPlayers(Player currentPlayer) {
+        for (GamePlayer gp : currentPlayers) {
+            Player p = Bukkit.getPlayer(gp.getId());
+            if (p != null) {
+                if (p.equals(currentPlayer)) {
+                    p.sendTitle("§aYour Turn!", "Choose a detonator", 10, 40, 10);
+                } else {
+                    p.sendTitle("§e" + currentPlayer.getName() + "'s Turn", "Waiting for their choice...", 10, 40, 10);
+                }
+            }
+        }
+    }
+
+    /**
+     * Starts a countdown timer using the existing CountdownTimer class
+     */
+    private void startCountdownForAllPlayers(int seconds, GamePlayer turnPlayer) {
+        if (currentCountdownTimer != null) {
+            currentCountdownTimer.stopAndHide();
+        }
+
+
+        List<Player> bukkitPlayers = new ArrayList<>();
+        for (GamePlayer gp : currentPlayers) {
+            Player p = Bukkit.getPlayer(gp.getId());
+            if (p != null) {
+                bukkitPlayers.add(p);
+            }
+        }
+
+        // Create and start the countdown timer
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("BowsersBigBlast");
+        currentCountdownTimer = new CountdownTimer(plugin, bukkitPlayers);
+        currentCountdownTimer.start(seconds);
+
+        // Schedule timeout handler
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (currentCountdownTimer != null) {
+                currentCountdownTimer.stopAndHide();
+                currentCountdownTimer = null;
+                Player bukkitPlayer = Bukkit.getPlayer(turnPlayer.getId());
+
+                if (bukkitPlayer != null) {
+                    for (GamePlayer gp : currentPlayers) {
+                        Player p = Bukkit.getPlayer(gp.getId());
+
+                        if (p != null) {
+                            if (gp.equals(turnPlayer)) {
+                                p.sendTitle("§cOut of Time!", "A random choice will be made", 10, 40, 10);
+                            } else {
+                                p.sendTitle("§c" + turnPlayer.getName() + " Out of Time!", "Random choice being made...", 10, 40, 10);
+                            }
+                        }
+                    }
+
+                    // if time is up randomly select an unlucky option
+                    Bukkit.getLogger().info("Player " + bukkitPlayer.getName() + " ran out of time!");
+                    DetonatorManager.getInstance().autoSelectDetonatorForPlayer(bukkitPlayer);
+                }
+            }
+        }, (seconds + 1) * 20L); // Add 1 second buffer to ensure countdown finishes
+    }
+
     public void cancelCountdown() {
-        if (currentCountdownTask != null) {
-            currentCountdownTask.cancel();
-            currentCountdownTask = null;
+        if (currentCountdownTimer != null) {
+            currentCountdownTimer.stopAndHide();
+            currentCountdownTimer = null;
         }
     }
 

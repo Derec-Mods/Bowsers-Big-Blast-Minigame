@@ -24,11 +24,6 @@ import java.util.Random;
 
 public class DetonatorListener implements Listener {
 
-    private static final NamespacedKey BOWSER_TNT_KEY = new NamespacedKey(
-        Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
-        "bowser_tnt"
-    );
-
     @EventHandler
     public void onPlayerInteract (PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
@@ -36,7 +31,6 @@ public class DetonatorListener implements Listener {
         }
 
         Block clicked = event.getClickedBlock();
-        Bukkit.getLogger().info("DEBUG: Clicked block: " + (clicked != null ? clicked.getType() + " at " + clicked.getLocation() : "null"));
 
         if (clicked == null) {
             return;
@@ -48,11 +42,13 @@ public class DetonatorListener implements Listener {
         }
 
         Detonator detonator = DetonatorManager.getInstance().getDetonatorByBlock(clicked);
-        Bukkit.getLogger().info("DEBUG: Detonator lookup result: " + (detonator != null ? detonator.toString() : "null"));
 
         if (detonator == null) {
             return;
         }
+
+        Bukkit.getLogger().info("DEBUG: Detonator lookup result: " + (detonator != null ? detonator.toString() : "null"));
+        Bukkit.getLogger().info("DEBUG: Clicked block: " + (clicked != null ? clicked.getType() + " at " + clicked.getLocation() : "null"));
 
         // reset countdown meaning they interacted
         GameState.getInstance().cancelCountdown();
@@ -74,58 +70,13 @@ public class DetonatorListener implements Listener {
         if (gamePlayer != null) {
             Bukkit.getLogger().info("Is detonator: " + detonator.isBomb());
             if (detonator.isBomb()) {
-                event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
-                event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 100, false, false, false));
-                // Countdown: 3, 2, 1 (red titles)
-                for (int i = 0; i < 3; i++) {
-                    int count = 3 - i;
-                    Bukkit.getScheduler().runTaskLater(
-                        Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
-                        () -> event.getPlayer().sendTitle("§c" + count, "", 0, 20, 0),
-                        i * 20L
-                    );
-                }
-
-                Bukkit.getScheduler().runTaskLater(
-                    Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
-                    () -> {
-                        spawnTNTRain(event.getPlayer().getLocation());
-                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                        GameState.getInstance().onPlayerEliminated(gamePlayer);
-                    },
-                    60L // 3 seconds
-                );
+                DetonatorManager.getInstance().handleUnluckyChoice(event.getPlayer(), gamePlayer);
             } else {
+                event.getPlayer().sendTitle("§aSafe", "", 10, 40, 10);
                 GameState.getInstance().onPlayerSafe();
             }
         } else {
             Bukkit.getLogger().warning("Detonator or GamePlayer is null");
-        }
-    }
-
-    /**
-     * Spawns multiple TNT entities in a spread pattern above the player location
-     */
-    private void spawnTNTRain(Location playerLocation) {
-        Random random = new Random();
-        int tntCount = 8 + random.nextInt(5); // 8-12 TNT entities
-
-        for (int i = 0; i < tntCount; i++) {
-            // Create random offset positions around the player
-            double offsetX = (random.nextDouble() - 0.5) * 6; // -3 to +3 blocks
-            double offsetZ = (random.nextDouble() - 0.5) * 6; // -3 to +3 blocks
-            double height = 8 + random.nextDouble() * 4; // 8-12 blocks high
-
-            Location tntLocation = playerLocation.clone().add(offsetX, height, offsetZ);
-            TNTPrimed tnt = tntLocation.getWorld().spawn(tntLocation, TNTPrimed.class);
-
-            // Set random fuse time between 20-80 ticks (1-4 seconds)
-            tnt.setFuseTicks(20 + random.nextInt(61));
-
-            // Tag the TNT so it won't break blocks
-            tnt.getPersistentDataContainer().set(BOWSER_TNT_KEY, PersistentDataType.BOOLEAN, true);
-
-            Bukkit.getLogger().info("Spawned tagged TNT at: " + tntLocation);
         }
     }
 }

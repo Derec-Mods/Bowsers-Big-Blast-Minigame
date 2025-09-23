@@ -10,10 +10,22 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
+import org.bukkit.Sound;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.NamespacedKey;
+import io.github.derec4.bowsersBigBlast.player.GamePlayer;
 import java.util.*;
 
 public class DetonatorManager {
     private final Map<DetonatorLocation, Detonator> detonatorMap = new HashMap<>();
+
+    private static final NamespacedKey BOWSER_TNT_KEY = new NamespacedKey(
+        Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
+        "bowser_tnt"
+    );
 
     private static DetonatorManager instance;
     public static DetonatorManager getInstance() {
@@ -127,6 +139,63 @@ public class DetonatorManager {
     }
 
     /**
+     * Handles the unlucky choice logic for when a player picks the bomb detonator.
+     * This includes the "Unlucky!" title, countdown, TNT spawning, and elimination.
+     */
+    public void handleUnluckyChoice(Player player, GamePlayer gamePlayer) {
+        player.sendTitle("§cUnlucky!", "", 10, 40, 10);
+
+        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_BREAK, 1.0f, 1.0f);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 200, false, false, false));
+
+        // Countdown: 3, 2, 1 (red titles)
+        for (int i = 0; i < 3; i++) {
+            int count = 3 - i;
+            Bukkit.getScheduler().runTaskLater(
+                Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
+                () -> player.sendTitle("§c" + count, "", 0, 20, 0),
+                i * 20L
+            );
+        }
+
+        // After countdown, spawn TNT and eliminate player
+        Bukkit.getScheduler().runTaskLater(
+            Bukkit.getPluginManager().getPlugin("BowsersBigBlast"),
+            () -> {
+                spawnTNTRain(player.getLocation());
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                GameState.getInstance().onPlayerEliminated(gamePlayer);
+            },
+            60L // 3 seconds
+        );
+    }
+
+    /**
+     * Spawns multiple TNT entities in a spread pattern above the player location
+     */
+    private void spawnTNTRain(Location playerLocation) {
+        Random random = new Random();
+        int tntCount = 8 + random.nextInt(5);
+
+        for (int i = 0; i < tntCount; i++) {
+            // Create random offset positions around the player
+            double offsetX = (random.nextDouble() - 0.5) * 6; // -3 to +3 blocks
+            double offsetZ = (random.nextDouble() - 0.5) * 6; // -3 to +3 blocks
+            double height = 8 + random.nextDouble() * 4; // 8-12 blocks high
+
+            Location tntLocation = playerLocation.clone().add(offsetX, height, offsetZ);
+            TNTPrimed tnt = tntLocation.getWorld().spawn(tntLocation, TNTPrimed.class);
+
+            tnt.setFuseTicks(20 + random.nextInt(61));
+
+            // Tag the TNT so it won't break blocks
+            tnt.getPersistentDataContainer().set(BOWSER_TNT_KEY, PersistentDataType.BOOLEAN, true);
+
+            Bukkit.getLogger().info("Spawned tagged TNT at: " + tntLocation);
+        }
+    }
+
+    /**
      * Randomly selects a detonator for the player and simulates pressing it.
      */
     public void autoSelectDetonatorForPlayer(Player player) {
@@ -141,11 +210,15 @@ public class DetonatorManager {
         Detonator chosen = available.get(rand.nextInt(available.size()));
         Bukkit.getLogger().info("Auto-selecting detonator for player: " + player.getName() + " -> " + chosen);
 
+        // Find the GamePlayer for this player
+        GamePlayer gamePlayer = GameState.getInstance().getCurrentPlayers().stream()
+            .filter(gp -> gp.getId().equals(player.getUniqueId()))
+            .findFirst().orElse(null);
+
         if (chosen.isBomb()) {
-            player.sendTitle("§cUnlucky!", "", 10, 40, 10);
-            GameState.getInstance().onPlayerEliminated(GameState.getInstance().getCurrentPlayers().stream()
-                .filter(gp -> gp.getId().equals(player.getUniqueId())).findFirst().orElse(null));
+            handleUnluckyChoice(player, gamePlayer);
         } else {
+            player.sendTitle("§aSafe", "", 10, 40, 10);
             GameState.getInstance().onPlayerSafe();
         }
     }
