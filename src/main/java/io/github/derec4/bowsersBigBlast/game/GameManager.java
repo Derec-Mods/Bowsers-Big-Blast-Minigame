@@ -28,6 +28,10 @@ import java.util.Random;
  * // 4. Declare the last remaining player as the winner.
  * // 5. Reset game state for next game.
  */
+
+/**
+ * Current stuff - timer does not reset per person
+ */
 public class GameManager {
     private static GameManager instance;
     private final List<GamePlayer> currentPlayers = new ArrayList<>();
@@ -107,8 +111,7 @@ public class GameManager {
         setGameRunning(true);
         round = 1;
         currentDetonatorCount = currentPlayers.size();
-        Bukkit.getLogger().info("Game started with " + currentDetonatorCount + " detonators.");
-        System.out.println(currentPlayers);
+        Bukkit.getLogger().info("Game started with " + currentDetonatorCount + " detonators and players: " + currentPlayers.toString());
         startRound();
     }
 
@@ -141,6 +144,8 @@ public class GameManager {
     }
 
     public void nextPlayerTurn() {
+        cancelCountdown();
+
         if (currentPlayerIndex >= currentPlayers.size()) {
             endRound();
             return;

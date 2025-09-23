@@ -61,7 +61,7 @@ public class CommandManager implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            completions.addAll(Arrays.asList("4", "5", "6", "stop"));
+            completions.addAll(Arrays.asList("[number]", "stop"));
         }
         return completions;
     }
