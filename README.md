@@ -1,6 +1,1 @@
-Copyright (c) 2026 Derek Chen
-
-All rights reserved.
-
-This source code and project are the property of Derek Chen. 
-No license is granted to copy, modify, compile, distribute, or use this code, whether in part or in whole, without explicit written permission from the author.
+This project is an unofficial, fan-made mod inspired by the "Bowser's Big Blast" minigame from the Mario Party series. All original game concepts, character names, and intellectual property belong entirely to Nintendo. This mod is not affiliated with, endorsed by, or sponsored by Nintendo in any way.
